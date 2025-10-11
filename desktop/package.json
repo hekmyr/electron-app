@@ -1,0 +1,20 @@
+{
+  "scripts": {
+    "build": "tsc && npm run build:preload",
+    "build:preload": "esbuild src/preload.ts --bundle --platform=node --outfile=../dist/desktop/src/preload.js --external:electron --external:@prisma/client --tsconfig=tsconfig.json",
+    "start": "electron ../dist/desktop/src/main.js"
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  },
+  "devDependencies": {
+    "@angular/cli": "^20.3.5",
+    "electron": "^38.2.2",
+    "esbuild": "^0.25.10",
+    "prisma": "^6.17.1",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.17.1"
+  }
+}
