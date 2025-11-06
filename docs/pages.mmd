@@ -1,0 +1,73 @@
+%%{init: {"flowchart": {"defaultRenderer": "elk"}}}%%
+flowchart LR
+classDef BEYOND_MVP fill:#cccccc,stroke:#999999
+classDef MVP_1 fill:#e0f7fa,stroke:#26c6da
+classDef MVP_2 fill:#e8f5e9,stroke:#66bb6a
+classDef MVP_3 fill:#fff8e1,stroke:#ffb300
+classDef MVP_4 fill:#f3e5f5,stroke:#ab47bc
+classDef MVP_5 fill:#ffebee,stroke:#ef5350
+
+Homepage[Homepage] --> Dashboard[Dashboard]
+Homepage --> Customers[Customers]
+Homepage --> Packages[Packages]
+Homepage --> Deliveries[Deliveries]
+Homepage --> Returns[Returns]
+Homepage --> Vehicles[Vehicles]
+Homepage --> Settings[Settings]
+
+Comments[Comments]
+
+Customers --> CustomersTable[Table fields - Firstname, Lastname, Email, Id, City, Account created, Status active/inactive, Comments]
+Customers --> CustomerId[customers/:id]
+%% CustomerId --> Addresses[Addresses]
+%% Addresses --> AddAddress[Add address]
+%% Addresses --> SetDeliveryAddress[Set delivery address]
+%% Addresses --> UpdateAddress[Update address]
+%% Addresses --> HideAddress[Hide address]
+%% Addresses --> ShowHiddenPackage[Show hidden package]
+%% CustomerId --> CustomerPackages[Packages]
+%% CustomerPackages --> AddPackage[Add package]
+%% CustomerPackages --> UpdatePackage[Update package]
+%% CustomerPackages --> HidePackage[Hide package]
+%% CustomerPackages --> ShowHiddenPackage2[Show hidden package]
+%% CustomerId --> CustomerDeliveries[Deliveries]
+%% CustomerDeliveries --> AddDelivery[Add a delivery]
+%% CustomerDeliveries --> UpdateDelivery[Update delivery]
+%% CustomerDeliveries --> HideDelivery[Hide delivery]
+%% CustomerDeliveries --> ShowHiddenDelivery[Show hidden delivery]
+
+Packages --> PackageId[packages/:id]
+%% PackageId --> PStatus[Status: created, received, in transit, delivered, returned]
+%% PackageId --> SenderInfo[Sender informations]
+%% PackageId --> DestinationInfo[Destination informations]
+%% PackageId --> VehicleCard[Vehicle]
+%% PackageId --> ScanHistory[History of scans]
+%% PackageId --> DestinationMap[Destination location]
+%% PackageId --> PInstructions[Instructions]
+
+Deliveries --> DeliveryId[deliveries/:id]
+%% DeliveryId --> DStatus[Status: scheduled, in transit, delivered, failed, cancelled]
+%% DeliveryId --> AddressCard[Address]
+%% DeliveryId --> UpdatesTable[Updates]
+%% DeliveryId --> PackagesTable[Packages]
+%% DeliveryId --> DInstructions[Instructions]
+
+Returns --> ReturnId[returns/:id]
+%% ReturnId --> RStatus[Status: timeline]
+%% ReturnId --> ReturnPackageInfo[Package informations]
+
+Vehicles --> VehicleId[vehicles/:id]
+
+class Settings,CustomersTable BEYOND_MVP
+class Dashboard,Vehicles,VehicleId MVP_3
+class CustomerId,PackageId MVP_1
+class Deliveries,DeliveryId,AddressCard,UpdatesTable,PackagesTable,DInstructions,Returns,ReturnId,RStatus,ReturnPackageInfo MVP_2
+
+subgraph Legend
+  BEYOND_MVP[BEYOND_MVP: Items beyond the MVP / backlog / low priority]:::BEYOND_MVP
+  MVP_1[MVP_1: Planned for MVP 1 (highest initial priority)]:::MVP_1
+  MVP_2[MVP_2: Planned for MVP 2]:::MVP_2
+  MVP_3[MVP_3: Planned for MVP 3]:::MVP_3
+  MVP_4[MVP_4: Planned for MVP 4]:::MVP_4
+  MVP_5[MVP_5: Planned for MVP 5]:::MVP_5
+end
