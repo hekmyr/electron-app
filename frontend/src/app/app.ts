@@ -6,7 +6,7 @@ import { RouterOutlet } from '@angular/router';
   standalone: true,
   imports: [RouterOutlet],
   template: `
-    <h1>Welcome to {{ title() }}!</h1>
+    <h1 class="font-bold text-xl">Welcome to {{ title() }}!</h1>
 
     <p>{{ content() }}</p>
 
