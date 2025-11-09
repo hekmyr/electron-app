@@ -19,6 +19,8 @@
       "@/shared/*": [
         "../shared/*"
       ],
+      "@/*": ["./src/*"],
+      "@libs/*": ["./libs/*"],
       "@spartan-ng/helm/breadcrumb": [
         "./libs/ui/breadcrumb/src/index.ts"
       ],
