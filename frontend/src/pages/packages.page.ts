@@ -14,7 +14,7 @@ import { BreadcrumbItem } from "@libs/app/header.component";
 })
 export class PackagesPage {
   protected readonly breadcrumbs: BreadcrumbItem[] = [
-    { label: "Packages", url: "/customers" }
+    { label: "Packages", url: "/packages" }
   ];
 
   protected readonly content = (() => {
