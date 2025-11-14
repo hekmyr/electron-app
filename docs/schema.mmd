@@ -1,0 +1,171 @@
+---
+config:
+  layout: elk
+  look: neo
+  theme: redux
+---
+erDiagram
+  CUSTOMERS {
+    string id PK
+    string email
+    string phone
+    string firstName
+    string lastName
+    string birthdate
+    string billingAddressId FK
+    string deliveryAddressId FK
+    string createdAt
+    string updatedAt
+  }
+
+  ADDRESSES {
+    string id PK
+    string street
+    string houseNumber
+    string boxNumber
+    string postalCode
+    string city
+    string countryCode
+    string createdAt
+    string updatedAt
+  }
+
+  PACKAGES {
+    string id PK
+    string customerId FK
+    string deliveryId FK
+    string vehicleId FK
+    string destinationAddressId FK
+    string name
+    string description
+    string status
+    string createdAt
+    string updatedAt
+  }
+
+  DELIVERIES {
+    string id PK
+    string customerId FK
+    string addressId FK
+    string status
+    string scheduledAt
+    string createdAt
+    string updatedAt
+  }
+
+  DELIVERY_UPDATES {
+    string id PK
+    string deliveryId FK
+    string status
+    string message
+    string createdAt
+  }
+
+  PACKAGE_UPDATES {
+    string id PK
+    string packageId FK
+    string status
+    string message
+    string createdAt
+  }
+
+  RETURNS {
+    string id PK
+    string packageId FK
+    string status
+    string reason
+    string createdAt
+    string updatedAt
+  }
+
+  VEHICLES {
+    string id PK
+    string name
+    string plate
+    string status
+    string createdAt
+    string updatedAt
+  }
+
+  COMMENTS {
+    string id PK
+    string content
+    string createdAt
+    string updatedAt
+  }
+
+  CUSTOMERS_COMMENTS {
+    string customerId FK
+    string commentId FK
+  }
+
+  PACKAGES_COMMENTS {
+    string packageId FK
+    string commentId FK
+  }
+
+  DELIVERIES_COMMENTS {
+    string deliveryId FK
+    string commentId FK
+  }
+
+  VEHICLES_COMMENTS {
+    string vehicleId FK
+    string commentId FK
+  }
+
+
+
+  CUSTOMERS ||--o{ ADDRESSES : has
+  CUSTOMERS }o--|| ADDRESSES : "billing"
+  CUSTOMERS }o--|| ADDRESSES : "delivery"
+  CUSTOMERS ||--o{ PACKAGES : has
+  CUSTOMERS ||--o{ DELIVERIES : schedules
+  DELIVERIES ||--o{ DELIVERY_UPDATES : updates
+  DELIVERIES ||--o{ PACKAGES : includes
+  VEHICLES ||--o{ PACKAGES : carries
+  PACKAGES ||--o{ PACKAGE_UPDATES : updates
+  PACKAGES }o--|| ADDRESSES : shipsTo
+  DELIVERIES }o--|| ADDRESSES : toAddress
+  PACKAGES ||--o| RETURNS : mayReturn
+  CUSTOMERS ||--o{ CUSTOMERS_COMMENTS : ""
+  CUSTOMERS_COMMENTS }o--|| COMMENTS : ""
+  PACKAGES ||--o{ PACKAGES_COMMENTS : ""
+  PACKAGES_COMMENTS }o--|| COMMENTS : ""
+  DELIVERIES ||--o{ DELIVERIES_COMMENTS : ""
+  DELIVERIES_COMMENTS }o--|| COMMENTS : ""
+  VEHICLES ||--o{ VEHICLES_COMMENTS : ""
+  VEHICLES_COMMENTS }o--|| COMMENTS : ""
+
+  %% Legend Table
+  COLOR_LEGEND ||--|| BEYOND_MVP_LEGEND: ""
+  COLOR_LEGEND ||--|| MVP_1_LEGEND: ""
+  COLOR_LEGEND ||--|| MVP_2_LEGEND: ""
+  COLOR_LEGEND ||--|| MVP_3_LEGEND: ""
+  COLOR_LEGEND ||--|| MVP_4_LEGEND: ""
+  COLOR_LEGEND ||--|| MVP_5_LEGEND: ""
+
+  %% MVP_2: DELIVERIES, DELIVERY_UPDATES, RETURNS
+  style DELIVERIES fill:#e8f5e9
+  style DELIVERY_UPDATES fill:#e8f5e9
+  style RETURNS fill:#e8f5e9
+
+  %% MVP_3: VEHICLES
+  style VEHICLES fill:#fff8e1
+
+  %% MVP_4: COMMENTS, junction tables
+  style COMMENTS fill:#f3e5f5
+  style CUSTOMERS_COMMENTS fill:#f3e5f5
+  style PACKAGES_COMMENTS fill:#f3e5f5
+  style DELIVERIES_COMMENTS fill:#f3e5f5
+  style VEHICLES_COMMENTS fill:#f3e5f5
+
+  %% Legend styles
+  style COLOR_LEGEND fill:#f5f5f5,stroke:#333333
+  style BEYOND_MVP_LEGEND fill:#cccccc,stroke:#999999
+  style MVP_1_LEGEND fill:#e0f7fa,stroke:#26c6da
+  style MVP_2_LEGEND fill:#e8f5e9,stroke:#66bb6a
+  style MVP_3_LEGEND fill:#fff8e1,stroke:#ffb300
+  style MVP_4_LEGEND fill:#f3e5f5,stroke:#ab47bc
+  style MVP_5_LEGEND fill:#ffebee,stroke:#ef5350
+
