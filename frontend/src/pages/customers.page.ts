@@ -35,17 +35,17 @@ export class CustomersPage {
   protected readonly _columns = [
     {
       accessorKey: 'id',
-			id: 'id',
-			header: 'ID',
-			enableSorting: false,
-			cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
+       id: 'id',
+        header: 'ID',
+        enableSorting: false,
+        cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
     },
     {
       accessorKey: 'email',
       id: 'email',
-			header: 'Email',
-			enableSorting: false,
-			cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
+      header: 'Email',
+      enableSorting: false,
+      cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
     },
     {
       accessorKey: 'firstName',
@@ -78,10 +78,10 @@ export class CustomersPage {
   ];
 
   protected readonly _table = createAngularTable<CustomerDTO>(() => ({
-		data: this._customers,
-		columns: this._columns,
+    data: this._customers,
+    columns: this._columns,
     getCoreRowModel: getCoreRowModel(),
-	}));
+  }));
 
   constructor() {
     this._dataService = inject(DataServiceImpl);
