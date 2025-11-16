@@ -1,6 +1,6 @@
+import { Icon } from "@/shared/types/icon";
 import { Component, input } from "@angular/core";
 import { NgIcon } from '@ng-icons/core';
-import * as LucideIcons from '@ng-icons/lucide';
 import { HlmBreadCrumbImports } from "@spartan-ng/helm/breadcrumb";
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmIconImports } from '@spartan-ng/helm/icon';
@@ -55,14 +55,6 @@ export class HeaderComponent {
 export interface BreadcrumbItem {
   label: string,
   url: string
-}
-
-export type IconValue = typeof LucideIcons[keyof typeof LucideIcons];
-
-export interface Icon {
-  name: string;
-  value: IconValue;
-  key: string;
 }
 
 export interface QuickAction {

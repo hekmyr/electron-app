@@ -2,6 +2,7 @@ import { Component, input } from "@angular/core";
 import { HlmTable, HlmTableContainer, HlmTBody, HlmTd, HlmTh, HlmTHead, HlmTr } from "@libs/ui/table/src";
 import type { ColumnDef } from '@tanstack/angular-table';
 import { createAngularTable, FlexRenderDirective, getCoreRowModel } from '@tanstack/angular-table';
+import { Action, ActionsComponent } from "./actions.component";
 
 @Component({
 	selector: 'app-table',
@@ -14,7 +15,8 @@ import { createAngularTable, FlexRenderDirective, getCoreRowModel } from '@tanst
     HlmTBody,
     HlmTr,
     HlmTh,
-    HlmTd
+    HlmTd,
+    ActionsComponent
   ],
 	template: `
 		<!-- we defer the loading of the table, because tanstack manipulates the DOM with flexRender which can cause errors during SSR -->
@@ -45,8 +47,18 @@ import { createAngularTable, FlexRenderDirective, getCoreRowModel } from '@tanst
           <tbody hlmTBody>
             @for (row of _table.getRowModel().rows; track row.id) {
               <tr hlmTr class="h-8">
-                @for (cell of row.getVisibleCells(); track cell.id) {
-                  <td hlmTd>
+                @let cells = row.getVisibleCells();
+                @for (cell of cells; track cell.id) {
+                  <td hlmTd
+                    class="relative"
+                    (mouseenter)="setHoveredDetails(row)"
+                  >
+                    @if ($index === cells.length - 1 && isLineHovered(row)) {
+                      <app-actions
+                        class="absolute right-0 top-1/2 -translate-y-1/2 z-5"
+                        [actions]="actionsSignal()"
+                      />
+                    }
                     <ng-container
                       *flexRender="
                         cell.column.columnDef.cell;
@@ -67,13 +79,43 @@ import { createAngularTable, FlexRenderDirective, getCoreRowModel } from '@tanst
 	`,
 })
 export class TableComponent<T> {
-	public readonly columns = input.required<ColumnDef<T, any>[]>();
-	public readonly data = input.required<T[]>();
+	public readonly columnsSignal = input.required<ColumnDef<T, any>[]>({ alias: 'columns' });
+	public readonly dataSignal = input.required<T[]>({ alias: 'data' });
+  public readonly actionsSignal = input<Action[]>([], { alias: 'actions' });
+  
+  protected _hoveredDetails: HoveredDetails | null = null;
 
 	protected readonly _table = createAngularTable<T>(() => ({
-		data: this.data(),
-		columns: this.columns(),
+		data: this.dataSignal(),
+		columns: this.columnsSignal(),
 		getCoreRowModel: getCoreRowModel(),
 	}));
+
+  setHoveredDetails(rowDetails: Row<T> | null) {
+    if (rowDetails === null) {
+      this._hoveredDetails = null;
+      return;
+    }
+    const original: any = rowDetails.original;
+    const index = rowDetails.index;
+    this._hoveredDetails = {
+      id: original.id,
+      index: index
+    }
+  }
+
+  isLineHovered(row: Row<T>) {
+    if (this._hoveredDetails === null) return false;
+    return this._hoveredDetails.index === row.index;
+  }
 }
 
+interface Row<T> {
+  original: T;
+  index: number;
+}
+
+interface HoveredDetails {
+  id: string;
+  index: number;
+}

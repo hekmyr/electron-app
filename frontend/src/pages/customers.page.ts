@@ -1,15 +1,30 @@
 import { DataService, DataServiceImpl } from "@/shared/services/data";
+import { IconValue } from "@/shared/types/icon";
 import { Component, inject } from "@angular/core";
-import { BreadcrumbItem, IconValue, QuickAction } from "@libs/app/header.component";
+import { Action } from "@libs/app/actions.component";
+import { BreadcrumbItem, QuickAction } from "@libs/app/header.component";
 import { ShellComponent } from "@libs/app/shell.component";
 import { TableComponent } from '@libs/app/table.component';
 import { provideIcons } from "@ng-icons/core";
-import { lucidePlus } from "@ng-icons/lucide";
+import { lucidePenLine, lucidePlus, lucideTrash2 } from "@ng-icons/lucide";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 
-const actions: QuickAction[] = [
+const quickActions: QuickAction[] = [
   {
     icon: { name: 'lucide-plus', value: lucidePlus, key: 'lucidePlus' },
+    onClick: () => { }
+  }
+];
+
+const rowActions: Action[] = [
+  { 
+    label: 'Edit',
+    icon: { name: 'lucide-pen-line', value: lucidePenLine, key: 'lucidePenLine' },
+    onClick: () => { }
+  },
+  {
+    label: 'Delete',
+    icon: { name: 'lucide-trash-2', value: lucideTrash2, key: 'lucideTrash2' },
     onClick: () => { }
   }
 ];
@@ -23,22 +38,31 @@ const actions: QuickAction[] = [
   template: `
     <app-shell
       [breadcrumbs]="_breadcrumbs"
-      [actions]="actions"
+      [actions]="_quickActions"
     >
-      <app-table [data]="_customers" [columns]="_columns" />
+      <app-table
+        [data]="_customers"
+        [columns]="_columns"
+        [actions]="_rowActions"
+      />
     </app-shell>
   `,
   providers: [
-    provideIcons({ ...provideActionIcons(actions) })
+    provideIcons({
+      ...provideActionIcons(quickActions),
+      ...provideActionIcons(rowActions)
+    })
   ]
 })
 export class CustomersPage {
   private readonly _dataService: DataService;
 
+  protected readonly _quickActions = quickActions;
+  protected readonly _rowActions = rowActions;
+
   protected readonly _breadcrumbs: BreadcrumbItem[] = [
     { label: "Customers", url: "/customers" }
   ];
-  protected readonly actions = actions;
 
   protected readonly _customers: CustomerDTO[] = [];
   protected readonly _columns = [
@@ -83,7 +107,7 @@ export class CustomersPage {
       header: 'Created',
       enableSorting: false,
       cell: (info: { getValue<T>(): () => T }) => `${info.getValue<Date>()}`,
-    },
+    }
   ];
 
   constructor() {
