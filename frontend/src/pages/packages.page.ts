@@ -6,14 +6,14 @@ import { BreadcrumbItem } from "@libs/app/header.component";
   selector: 'app-packages',
   imports: [ShellComponent],
   template: `
-    <app-shell [breadcrumbs]="breadcrumbs">
+    <app-shell [breadcrumbs]="_breadcrumbs">
       <h1>Packages</h1>
       <p>{{ content }}</p>
     </app-shell>
   `
 })
 export class PackagesPage {
-  protected readonly breadcrumbs: BreadcrumbItem[] = [
+  protected readonly _breadcrumbs: BreadcrumbItem[] = [
     { label: "Packages", url: "/packages" }
   ];
 

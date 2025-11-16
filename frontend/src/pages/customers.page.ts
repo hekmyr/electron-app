@@ -1,25 +1,77 @@
-import { Component } from "@angular/core";
-import { ShellComponent } from "@libs/app/shell.component";
+import { DataService, DataServiceImpl } from "@/shared/services/data";
+import { Component, inject } from "@angular/core";
 import { BreadcrumbItem } from "@libs/app/header.component";
+import { ShellComponent } from "@libs/app/shell.component";
+import { TableComponent } from '@libs/app/table.component';
+import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 
 @Component({
   selector: 'app-customers',
-  imports: [ShellComponent],
+  imports: [
+    ShellComponent,
+    TableComponent
+  ],
   template: `
-    <app-shell [breadcrumbs]="breadcrumbs">
-      <h1>Customers</h1>
-      <p>{{ content }}</p>
+    <app-shell [breadcrumbs]="_breadcrumbs">
+      <app-table [data]="_customers" [columns]="_columns" />
     </app-shell>
   `
 })
 export class CustomersPage {
-  protected readonly breadcrumbs: BreadcrumbItem[] = [
+  private readonly _dataService: DataService;
+
+  protected readonly _breadcrumbs: BreadcrumbItem[] = [
     { label: "Customers", url: "/customers" }
   ];
 
-  protected readonly content = (() => {
-    if (!window.electron) return 'Electron service not found';
-    const v = window.electron.version;
-    return `This app is using Chrome (v${v.chrome}), Node.js (v${v.node}), and Electron (v${v.electron})`;
-  })()
+  protected readonly _customers: CustomerDTO[] = [];
+  protected readonly _columns = [
+    {
+      accessorKey: 'id',
+       id: 'id',
+        header: 'ID',
+        enableSorting: false,
+        cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
+    },
+    {
+      accessorKey: 'email',
+      id: 'email',
+      header: 'Email',
+      enableSorting: false,
+      cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
+    },
+    {
+      accessorKey: 'firstName',
+      id: 'firstName',
+      header: 'First Name',
+      enableSorting: false,
+      cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
+    },
+    {
+      accessorKey: 'lastName',
+      id: 'lastName',
+      header: 'Last Name',
+      enableSorting: false,
+      cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
+    },
+    {
+      accessorKey: 'birthdate',
+      id: 'birthdate',
+      header: 'Age',
+      enableSorting: false,
+      cell: (info: { getValue<T>(): () => T }) => `${info.getValue<Date>()}`,
+    },
+    {
+      accessorKey: 'createdAt',
+      id: 'createdAt',
+      header: 'Created',
+      enableSorting: false,
+      cell: (info: { getValue<T>(): () => T }) => `${info.getValue<Date>()}`,
+    },
+  ];
+
+  constructor() {
+    this._dataService = inject(DataServiceImpl);
+    this._customers = this._dataService.customers.findCustomers(40);
+  }
 }
