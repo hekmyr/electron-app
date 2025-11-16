@@ -55,8 +55,8 @@ export class CustomersPage {
       cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
     },
     {
-      accessorKey: 'birthDate',
-      id: 'birthDate',
+      accessorKey: 'birthdate',
+      id: 'birthdate',
       header: 'Age',
       enableSorting: false,
       cell: (info: { getValue<T>(): () => T }) => `${info.getValue<Date>()}`,
