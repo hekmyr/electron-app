@@ -20,7 +20,7 @@ import {createAngularTable, FlexRenderDirective, getCoreRowModel} from '@tanstac
     HlmTh
   ],
   template: `
-    <app-shell [breadcrumbs]="breadcrumbs">
+    <app-shell [breadcrumbs]="_breadcrumbs">
       <!-- we defer the loading of the table, because tanstack manipulates the DOM with flexRender which can cause errors during SSR -->
       @defer {
         <div hlmTableContainer>
@@ -74,7 +74,7 @@ import {createAngularTable, FlexRenderDirective, getCoreRowModel} from '@tanstac
 export class CustomersPage {
   private readonly _dataService: DataService;
 
-  protected readonly breadcrumbs: BreadcrumbItem[] = [
+  protected readonly _breadcrumbs: BreadcrumbItem[] = [
     { label: "Customers", url: "/customers" }
   ];
 

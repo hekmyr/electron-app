@@ -6,14 +6,14 @@ import { BreadcrumbItem } from "@libs/app/header.component";
   selector: 'app-dashboard',
   imports: [ShellComponent],
   template: `
-    <app-shell [breadcrumbs]="breadcrumbs">
+    <app-shell [breadcrumbs]="_breadcrumbs">
       <h1>Dashboard</h1>
       <p>{{ content }}</p>
     </app-shell>
   `
 })
 export class DashboardPage {
-  protected readonly breadcrumbs: BreadcrumbItem[] = [
+  protected readonly _breadcrumbs: BreadcrumbItem[] = [
     { label: "Dashboard", url: "/" }
   ];
 
