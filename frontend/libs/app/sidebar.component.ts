@@ -30,7 +30,9 @@ import { HlmSidebarImports } from "@spartan-ng/helm/sidebar";
         </div>
         <div hlmSidebarFooter></div>
       </hlm-sidebar>
-      <ng-content />
+      <div class="w-full">
+        <ng-content />
+      </div>
     </div>
   `
 })
