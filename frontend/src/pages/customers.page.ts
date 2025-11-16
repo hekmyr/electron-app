@@ -5,69 +5,22 @@ import { HlmTable, HlmTableContainer, HlmTBody, HlmTh, HlmTHead, HlmTr } from "@
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 import { DataService } from "@/shared/services/data";
 import { DataServiceImpl } from "@/shared/services/data";
-import {createAngularTable, FlexRenderDirective, getCoreRowModel} from '@tanstack/angular-table'
+import {
+  createAngularTable,
+  FlexRenderDirective,
+  getCoreRowModel,
+} from '@tanstack/angular-table'
+import { TableComponent } from '@libs/app/table.component';
 
 @Component({
   selector: 'app-customers',
   imports: [
     ShellComponent,
-    FlexRenderDirective,
-    HlmTableContainer,
-    HlmTable,
-    HlmTHead,
-    HlmTBody,
-    HlmTr,
-    HlmTh
+    TableComponent
   ],
   template: `
     <app-shell [breadcrumbs]="_breadcrumbs">
-      <!-- we defer the loading of the table, because tanstack manipulates the DOM with flexRender which can cause errors during SSR -->
-      @defer {
-        <div hlmTableContainer>
-          <table hlmTable>
-            <thead hlmTHead>
-              @for (headerGroup of _table.getHeaderGroups(); track headerGroup.id) {
-                <tr hlmTr>
-                  @for (header of headerGroup.headers; track header.id) {
-                    <th hlmTh class="px-0">
-                      @if (!header.isPlaceholder) {
-                        <ng-container
-                          *flexRender="
-                            header.column.columnDef.header;
-                            props: header.getContext();
-                            let headerText
-                          "
-                        >
-                          {{ headerText }}
-                        </ng-container>
-                      }
-                    </th>
-                  }
-                </tr>
-              }
-            </thead>
-            <tbody hlmTBody>
-              @for (row of _table.getRowModel().rows; track row.id) {
-                <tr hlmTr class="h-8">
-                  @for (cell of row.getVisibleCells(); track cell.id) {
-                    <td hlmTd>
-                      <ng-container
-                        *flexRender="
-                          cell.column.columnDef.cell;
-                          props: cell.getContext();
-                          let cellText
-                        "
-                      >
-                        {{ cellText }}
-                      </ng-container>
-                    </td>
-                  }
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
+      <app-table [data]="_customers" [columns]="_columns" />
     </app-shell>
   `
 })
