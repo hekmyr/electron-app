@@ -1,7 +1,7 @@
 import { Component, input } from "@angular/core";
-import { FlexRenderDirective, createAngularTable, getCoreRowModel } from '@tanstack/angular-table';
+import { HlmTable, HlmTableContainer, HlmTBody, HlmTd, HlmTh, HlmTHead, HlmTr } from "@libs/ui/table/src";
 import type { ColumnDef } from '@tanstack/angular-table';
-import { HlmTable, HlmTableContainer, HlmTHead, HlmTBody, HlmTr, HlmTd, HlmTh } from "@libs/ui/table/src";
+import { createAngularTable, FlexRenderDirective, getCoreRowModel } from '@tanstack/angular-table';
 
 @Component({
 	selector: 'app-table',

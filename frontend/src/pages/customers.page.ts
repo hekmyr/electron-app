@@ -1,16 +1,9 @@
+import { DataService, DataServiceImpl } from "@/shared/services/data";
 import { Component, inject } from "@angular/core";
-import { ShellComponent } from "@libs/app/shell.component";
 import { BreadcrumbItem } from "@libs/app/header.component";
-import { HlmTable, HlmTableContainer, HlmTBody, HlmTh, HlmTHead, HlmTr } from "@libs/ui/table/src";
-import { CustomerDTO } from "@shared/dto/customer-dto.interface";
-import { DataService } from "@/shared/services/data";
-import { DataServiceImpl } from "@/shared/services/data";
-import {
-  createAngularTable,
-  FlexRenderDirective,
-  getCoreRowModel,
-} from '@tanstack/angular-table'
+import { ShellComponent } from "@libs/app/shell.component";
 import { TableComponent } from '@libs/app/table.component';
+import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 
 @Component({
   selector: 'app-customers',
