@@ -24,7 +24,7 @@ export class CustomersPage {
     { label: "Customers", url: "/customers" }
   ];
 
-  protected _customers: CustomerDTO[] = [];
+  protected readonly _customers: CustomerDTO[] = [];
   protected readonly _columns = [
     {
       accessorKey: 'id',
