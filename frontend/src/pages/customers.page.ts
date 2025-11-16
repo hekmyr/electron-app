@@ -77,12 +77,6 @@ export class CustomersPage {
     },
   ];
 
-  protected readonly _table = createAngularTable<CustomerDTO>(() => ({
-    data: this._customers,
-    columns: this._columns,
-    getCoreRowModel: getCoreRowModel(),
-  }));
-
   constructor() {
     this._dataService = inject(DataServiceImpl);
     this._customers = this._dataService.customers.findCustomers(40);
