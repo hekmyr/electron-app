@@ -73,6 +73,5 @@ export class CustomersPage {
   constructor() {
     this._dataService = inject(DataServiceImpl);
     this._customers = this._dataService.customers.findCustomers(40);
-    console.log(this._customers);
   }
 }
