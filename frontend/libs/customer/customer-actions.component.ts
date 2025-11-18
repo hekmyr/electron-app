@@ -77,7 +77,7 @@ import { CustomerFormComponent } from "./customer-form.component";
 })
 export class CustomerActionsComponent {
   public readonly actionSignal = input.required<Action<CustomerDTO>[]>({alias: 'actions'});
-  public readonly contextSignal = input.required<any>({alias: 'context'});
+  public readonly contextSignal = input.required<CustomerDTO>({alias: 'context'});
 
   protected buildDialogInputs(action: Action<CustomerDTO>) {
     const context = this.contextSignal();
@@ -112,7 +112,7 @@ export interface ActionDialog<T> {
   description?: string;
   cancelLabel?: string;
   confirmLabel?: string;
-  inputs: (context: T) => Record<string, any>;
+  inputs: (context: CustomerDTO) => Record<string, any>;
 }
 
 interface DialogContext {

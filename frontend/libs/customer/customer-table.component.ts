@@ -3,6 +3,7 @@ import { HlmTable, HlmTableContainer, HlmTBody, HlmTd, HlmTh, HlmTHead, HlmTr } 
 import type { ColumnDef } from '@tanstack/angular-table';
 import { createAngularTable, FlexRenderDirective, getCoreRowModel } from '@tanstack/angular-table';
 import { Action, CustomerActionsComponent } from "./customer-actions.component";
+import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 
 @Component({
 	selector: 'app-table',
@@ -82,19 +83,19 @@ import { Action, CustomerActionsComponent } from "./customer-actions.component";
 	`,
 })
 export class CustomerTableComponent<T> {
-	public readonly columnsSignal = input.required<ColumnDef<T, any>[]>({ alias: 'columns' });
-	public readonly dataSignal = input.required<T[]>({ alias: 'data' });
+	public readonly columnsSignal = input.required<ColumnDef<CustomerDTO, any>[]>({ alias: 'columns' });
+	public readonly dataSignal = input.required<CustomerDTO[]>({ alias: 'data' });
   public readonly actionsSignal = input<Action<T>[]>([], { alias: 'actions' });
   
   protected _hoveredDetails: HoveredDetails | null = null;
 
-	protected readonly _table = createAngularTable<T>(() => ({
+	protected readonly _table = createAngularTable<CustomerDTO>(() => ({
 		data: this.dataSignal(),
 		columns: this.columnsSignal(),
 		getCoreRowModel: getCoreRowModel(),
 	}));
 
-  setHoveredDetails(rowDetails: Row<T> | null) {
+  setHoveredDetails(rowDetails: Row<CustomerDTO> | null) {
     if (rowDetails === null) {
       this._hoveredDetails = null;
       return;
@@ -107,7 +108,7 @@ export class CustomerTableComponent<T> {
     }
   }
 
-  isLineHovered(row: Row<T>) {
+  isLineHovered(row: Row<CustomerDTO>): boolean {
     if (this._hoveredDetails === null) return false;
     return this._hoveredDetails.index === row.index;
   }
