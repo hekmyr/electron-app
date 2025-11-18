@@ -1,11 +1,12 @@
 import { Icon } from "@/shared/types/icon";
-import { Component, Type, input } from "@angular/core";
+import { Component, Type, input, ViewChild } from "@angular/core";
 import { NgComponentOutlet } from "@angular/common";
 import { HlmAlertDialogImports } from "@libs/ui/alert-dialog/src";
 import { HlmButton } from "@libs/ui/button/src";
 import { NgIcon } from "@ng-icons/core";
 import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
+import { CustomerFormComponent } from "./customer-form.component";
 
 @Component({
   selector: 'customer-actions',
@@ -15,7 +16,8 @@ import { CustomerDTO } from "@shared/dto/customer-dto.interface";
     HlmButton,
     NgIcon,
     HlmAlertDialogImports,
-    BrnAlertDialogImports
+    BrnAlertDialogImports,
+    CustomerFormComponent
   ],
     template: `
       <div class="flex gap-2">
@@ -26,7 +28,6 @@ import { CustomerDTO } from "@shared/dto/customer-dto.interface";
               hlmBtn
               variant="ghost"
               brnAlertDialogTrigger
-              type="button"
             >
               <ng-icon hlm [name]="item.icon.name" />
             </button>
@@ -45,11 +46,10 @@ import { CustomerDTO } from "@shared/dto/customer-dto.interface";
                 </hlm-alert-dialog-header>
               }
 
-              <ng-container
-                *ngComponentOutlet="
-                  item.dialog.component;
-                  inputs: buildDialogInputs(item);
-                "
+              <customer-form
+                #formComponent
+                [customer]="contextSignal()"
+                (save)="handleFormSave($event, item, dialogCtx)"
               />
 
               <hlm-alert-dialog-footer>
@@ -62,9 +62,9 @@ import { CustomerDTO } from "@shared/dto/customer-dto.interface";
                 </button>
                 
                 <button
-                  hlmAlertDialogCancel
+                  hlmBtn
                   variant="default"
-                  (click)="executeAction(item, dialogCtx)"
+                  (click)="formComponent.submit()"
                 >
                   {{ item.dialog.confirmLabel ?? 'Save changes' }}
                 </button>
@@ -84,8 +84,17 @@ export class CustomerActionsComponent {
     return action.dialog.inputs(context);
   }
 
-  protected executeAction(action: Action<CustomerDTO>, dialog: DialogContext) {
-    action.execute();
+  private hasSaveCallback(inputs: Record<string, any>): inputs is { save: (event: { id: string; customer: CustomerDTO }) => void } {
+    return 'save' in inputs && typeof inputs['save'] === 'function';
+  }
+
+  protected handleFormSave(event: { id: string; customer: CustomerDTO }, action: Action<CustomerDTO>, dialog: DialogContext) {
+    
+    const inputs = this.buildDialogInputs(action);
+    if (this.hasSaveCallback(inputs)) {
+      inputs.save(event);
+    }
+    
     dialog.close();
   }
 }
@@ -103,7 +112,7 @@ export interface ActionDialog<T> {
   description?: string;
   cancelLabel?: string;
   confirmLabel?: string;
-  inputs: (context: T) => Record<string, T>;
+  inputs: (context: T) => Record<string, any>;
 }
 
 interface DialogContext {

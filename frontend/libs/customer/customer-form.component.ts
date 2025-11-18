@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, input, output } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HlmInput } from '@libs/ui/input/src';
 import { CustomerDTO } from '@shared/dto/customer-dto.interface';
 
@@ -12,7 +12,7 @@ import { CustomerDTO } from '@shared/dto/customer-dto.interface';
     <form
       class="grid gap-4"
       [formGroup]="form"
-      (ngSubmit)="handleSubmit()"
+      (ngSubmit)="submit()"
       id="edit-customer-form"
     >
       <label class="grid gap-2 text-sm">
@@ -29,13 +29,13 @@ import { CustomerDTO } from '@shared/dto/customer-dto.interface';
 })
 export class CustomerFormComponent implements OnInit {
   public readonly customerSignal = input<CustomerDTO>(undefined, {alias: 'customer'});
-  public readonly save = output<CustomerDTO>();
+  public readonly save = output<{ id: string; customer: CustomerDTO }>();
 
-  private readonly fb = inject(FormBuilder);
+  private readonly _formBuilder = inject(NonNullableFormBuilder);
 
-  protected readonly form = this.fb.group({
-    firstName: ['', [Validators.required]],
-    lastName: ['', [Validators.required]],
+  protected readonly form = this._formBuilder.group({
+    firstName: ['', [Validators.required, Validators.minLength(2)]],
+    lastName: ['', [Validators.required, Validators.minLength(2)]],
   });
 
   public ngOnInit() {
@@ -46,7 +46,17 @@ export class CustomerFormComponent implements OnInit {
     });
   }
 
-  protected handleSubmit() {
-    if (this.form.invalid) return;
+  public submit() {
+    const customer = this.customerSignal();
+    if (this.form.invalid || !customer) return;
+
+    const formValues = this.form.getRawValue();
+    const updatedCustomer: CustomerDTO = {
+      ...customer,
+      ...formValues,
+      updatedAt: new Date(),
+    };
+
+    this.save.emit({ id: customer.id, customer: updatedCustomer });
   }
 }

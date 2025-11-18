@@ -1,6 +1,6 @@
 import { DataService, DataServiceImpl } from "@/shared/services/data";
 import { IconValue } from "@/shared/types/icon";
-import { Component, inject } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { Action } from "@libs/customer/customer-actions.component";
 import { BreadcrumbItem, QuickAction } from "@libs/app/header.component";
 import { ShellComponent } from "@libs/app/shell.component";
@@ -18,25 +18,6 @@ const quickActions: QuickAction[] = [
   }
 ];
 
-const rowActions: Action<CustomerDTO>[] = [
-  { 
-    label: 'Edit',
-    icon: { name: 'lucide-pen-line', value: lucidePenLine, key: 'lucidePenLine' },
-    execute: () => { },
-    dialog: {
-      title: 'Edit customer',
-      description: 'Update the customer informations and save your changes.',
-      component: CustomerFormComponent,
-      inputs: (customer) => ({ customer }),
-    },
-  },
-  // {
-  //   label: 'Delete',
-  //   icon: { name: 'lucide-trash-2', value: lucideTrash2, key: 'lucideTrash2' },
-  //   onClick: () => { }
-  // }
-];
-
 @Component({
   selector: 'app-customers',
   imports: [
@@ -49,7 +30,7 @@ const rowActions: Action<CustomerDTO>[] = [
       [actions]="_quickActions"
     >
       <app-table
-        [data]="_customers"
+        [data]="_customers()"
         [columns]="_columns"
         [actions]="_rowActions"
       />
@@ -57,16 +38,17 @@ const rowActions: Action<CustomerDTO>[] = [
   `,
   providers: [
     provideIcons({
-      ...provideActionIcons(quickActions),
-      ...provideActionIcons(rowActions)
+      lucidePenLine,
+      lucidePlus
     })
   ]
 })
 export class CustomersPage {
   private readonly _dataService: DataService;
+  private readonly _customersMap: Map<string, CustomerDTO>;
 
   protected readonly _quickActions = quickActions;
-  protected readonly _rowActions = rowActions;
+  protected readonly _rowActions: Action<CustomerDTO>[];
 
   private static readonly _columnMeta: ColumnMeta = { kind: 'rowActions' };
 
@@ -74,7 +56,7 @@ export class CustomersPage {
     { label: "Customers", url: "/customers" }
   ];
 
-  protected readonly _customers: CustomerDTO[] = [];
+  protected readonly _customers = signal<CustomerDTO[]>([]);
   protected readonly _columns = [
     {
       accessorKey: 'id',
@@ -128,7 +110,34 @@ export class CustomersPage {
 
   constructor() {
     this._dataService = inject(DataServiceImpl);
-    this._customers = this._dataService.customers.findCustomers(40);
+    this._customersMap = this._dataService.customers.findCustomers(40);
+    this._customers.set(Array.from(this._customersMap.values()));
+
+    this._rowActions = [
+      { 
+        label: 'Edit',
+        icon: { name: 'lucide-pen-line', value: lucidePenLine, key: 'lucidePenLine' },
+        execute: () => { },
+        dialog: {
+          title: 'Edit customer',
+          description: 'Update the customer informations and save your changes.',
+          component: CustomerFormComponent,
+          inputs: (customer) => ({ 
+            customer,
+            save: (result: { id: string; customer: CustomerDTO }) => this.updateCustomer(result)
+          }),
+        },
+      },
+    ];
+  }
+
+  private updateCustomer(result: { id: string; customer: CustomerDTO }) {
+    this._customersMap.set(result.id, result.customer);
+    this._customers.set(Array.from(this._customersMap.values()));
+
+    this._dataService
+      .customers
+      .updateCustomer(result.id, result.customer);
   }
 }
 
