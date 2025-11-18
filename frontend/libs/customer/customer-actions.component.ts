@@ -7,6 +7,7 @@ import { NgIcon } from "@ng-icons/core";
 import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 import { CustomerFormComponent } from "./customer-form.component";
+import { CustomerDeleteConfirmComponent } from "./customer-delete-confirm.component";
 
 @Component({
   selector: 'customer-actions',
@@ -17,9 +18,10 @@ import { CustomerFormComponent } from "./customer-form.component";
     NgIcon,
     HlmAlertDialogImports,
     BrnAlertDialogImports,
-    CustomerFormComponent
+    CustomerFormComponent,
+    CustomerDeleteConfirmComponent
   ],
-    template: `
+  template: `
       <div class="flex gap-2">
         @let actions = actionSignal();
         @for (item of actions; track item.label) {
@@ -46,29 +48,54 @@ import { CustomerFormComponent } from "./customer-form.component";
                 </hlm-alert-dialog-header>
               }
 
-              <customer-form
-                #formComponent
-                [customer]="contextSignal()"
-                (save)="handleFormSave($event, item, dialogCtx)"
-              />
-
-              <hlm-alert-dialog-footer>
-                <button
-                  hlmAlertDialogCancel
-                  variant="ghost"
-                  (click)="dialogCtx.close()"
-                >
-                  {{ item.dialog.cancelLabel ?? 'Cancel' }}
-                </button>
-                
-                <button
-                  hlmBtn
-                  variant="default"
-                  (click)="formComponent.submit()"
-                >
-                  {{ item.dialog.confirmLabel ?? 'Save changes' }}
-                </button>
-              </hlm-alert-dialog-footer>
+              @switch (item.label) {
+                @case ('Edit') {
+                  <customer-form
+                    #formComponent
+                    [customer]="contextSignal()"
+                    (save)="handleFormSave($event, item, dialogCtx)"
+                  />
+                  <hlm-alert-dialog-footer>
+                    <button
+                      hlmAlertDialogCancel
+                      variant="ghost"
+                      (click)="dialogCtx.close()"
+                    >
+                      {{ item.dialog.cancelLabel ?? 'Cancel' }}
+                    </button>
+                    <button
+                      hlmBtn
+                      variant="default"
+                      (click)="formComponent.submit()"
+                    >
+                      {{ item.dialog.confirmLabel ?? 'Save changes' }}
+                    </button>
+                  </hlm-alert-dialog-footer>
+                }
+                @case ('Delete') {
+                  <customer-delete-confirm
+                    #confirmComponent
+                    [customer]="contextSignal()"
+                    (confirm)="handleConfirm($event, item, dialogCtx)"
+                  />
+                  <hlm-alert-dialog-footer>
+                    <button
+                      hlmAlertDialogCancel
+                      variant="ghost"
+                      (click)="dialogCtx.close()"
+                    >
+                      {{ item.dialog.cancelLabel ?? 'Cancel' }}
+                    </button>
+                    <button
+                      hlmBtn
+                      variant="destructive"
+                      (click)="confirmComponent.submit()"
+                    >
+                      {{ item.dialog.confirmLabel ?? 'Confirm' }}
+                    </button>
+                  </hlm-alert-dialog-footer>
+                }
+              }
             </hlm-alert-dialog-content>
           </hlm-alert-dialog>
         }
@@ -76,8 +103,8 @@ import { CustomerFormComponent } from "./customer-form.component";
     `
 })
 export class CustomerActionsComponent {
-  public readonly actionSignal = input.required<Action<CustomerDTO>[]>({alias: 'actions'});
-  public readonly contextSignal = input.required<CustomerDTO>({alias: 'context'});
+  public readonly actionSignal = input.required<Action<CustomerDTO>[]>({ alias: 'actions' });
+  public readonly contextSignal = input.required<CustomerDTO>({ alias: 'context' });
 
   protected buildDialogInputs(action: Action<CustomerDTO>) {
     const context = this.contextSignal();
@@ -89,18 +116,34 @@ export class CustomerActionsComponent {
   }
 
   protected handleFormSave(event: { id: string; customer: CustomerDTO }, action: Action<CustomerDTO>, dialog: DialogContext) {
-    
+
     const inputs = this.buildDialogInputs(action);
     if (this.hasSaveCallback(inputs)) {
       inputs.save(event);
     }
-    
+
     dialog.close();
+  }
+
+  protected handleConfirm(event: { id: string }, action: Action<CustomerDTO>, dialog: DialogContext) {
+    const inputs = this.buildDialogInputs(action);
+    if (this.hasConfirmCallback(inputs)) {
+      inputs.confirm(event);
+    }
+
+    dialog.close();
+  }
+
+  private hasConfirmCallback(inputs: Record<string, any>): inputs is { confirm: (event: { id: string }) => void } {
+    return 'confirm' in inputs && typeof inputs['confirm'] === 'function';
   }
 }
 
+const actionLabels = ['Edit', 'Delete'] as const;
+type ActionLabel = typeof actionLabels[number];
+
 export interface Action<T> {
-  label: string;
+  label: ActionLabel;
   icon: Icon,
   execute: () => void;
   dialog: ActionDialog<T>;

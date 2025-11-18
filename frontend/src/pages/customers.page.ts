@@ -6,8 +6,9 @@ import { BreadcrumbItem, QuickAction } from "@libs/app/header.component";
 import { ShellComponent } from "@libs/app/shell.component";
 import { CustomerTableComponent } from '@libs/customer/customer-table.component';
 import { CustomerFormComponent } from "@libs/customer/customer-form.component";
+import { CustomerDeleteConfirmComponent } from "@libs/customer/customer-delete-confirm.component";
 import { provideIcons } from "@ng-icons/core";
-import { lucidePenLine, lucidePlus } from "@ng-icons/lucide";
+import { lucidePenLine, lucidePlus, lucideTrash2 } from "@ng-icons/lucide";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 import type { CellContext } from "@tanstack/angular-table";
 
@@ -39,7 +40,8 @@ const quickActions: QuickAction[] = [
   providers: [
     provideIcons({
       lucidePenLine,
-      lucidePlus
+      lucidePlus,
+      lucideTrash2
     })
   ]
 })
@@ -60,10 +62,10 @@ export class CustomersPage {
   protected readonly _columns = [
     {
       accessorKey: 'id',
-       id: 'id',
-        header: 'ID',
-        enableSorting: false,
-        cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
+      id: 'id',
+      header: 'ID',
+      enableSorting: false,
+      cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
     },
     {
       accessorKey: 'email',
@@ -114,7 +116,7 @@ export class CustomersPage {
     this._customers.set(Array.from(this._customersMap.values()));
 
     this._rowActions = [
-      { 
+      {
         label: 'Edit',
         icon: { name: 'lucide-pen-line', value: lucidePenLine, key: 'lucidePenLine' },
         execute: () => { },
@@ -122,9 +124,24 @@ export class CustomersPage {
           title: 'Edit customer',
           description: 'Update the customer informations and save your changes.',
           component: CustomerFormComponent,
-          inputs: (customer) => ({ 
+          inputs: (customer) => ({
             customer,
             save: (result: { id: string; customer: CustomerDTO }) => this.updateCustomer(result)
+          }),
+        },
+      },
+      {
+        label: 'Delete',
+        icon: { name: 'lucide-trash-2', value: lucideTrash2, key: 'lucideTrash2' },
+        execute: () => { },
+        dialog: {
+          title: 'Delete customer',
+          description: 'This action cannot be undone.',
+          component: CustomerDeleteConfirmComponent,
+          confirmLabel: 'Delete',
+          inputs: (customer) => ({
+            customer,
+            confirm: (result: { id: string }) => this.deleteCustomer(result.id)
           }),
         },
       },
@@ -138,6 +155,15 @@ export class CustomersPage {
     this._dataService
       .customers
       .updateCustomer(result.id, result.customer);
+  }
+
+  private deleteCustomer(id: string) {
+    this._customersMap.delete(id);
+    this._customers.set(Array.from(this._customersMap.values()));
+
+    this._dataService
+      .customers
+      .deleteCustomer(id);
   }
 }
 
