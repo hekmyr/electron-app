@@ -53,21 +53,24 @@ import { Action, ActionsComponent } from "./actions.component";
                     class="relative"
                     (mouseenter)="setHoveredDetails(row)"
                   >
-                    @if ($index === cells.length - 1 && isLineHovered(row)) {
-                      <app-actions
-                        class="absolute right-0 top-1/2 -translate-y-1/2 z-5"
-                        [actions]="actionsSignal()"
-                      />
+                    @if (isRowActionColumn(cell.column.columnDef.meta)) {
+                      @if (isLineHovered(row)) {
+                        <app-actions
+                          [actions]="actionsSignal()"
+                          [context]="cell.getValue()"
+                        />
+                      }
+                    } @else {
+                      <ng-container
+                        *flexRender="
+                          cell.column.columnDef.cell;
+                          props: cell.getContext();
+                          let cellText
+                        "
+                      >
+                        {{ cellText }}
+                      </ng-container>
                     }
-                    <ng-container
-                      *flexRender="
-                        cell.column.columnDef.cell;
-                        props: cell.getContext();
-                        let cellText
-                      "
-                    >
-                      {{ cellText }}
-                    </ng-container>
                   </td>
                 }
               </tr>
@@ -108,6 +111,10 @@ export class TableComponent<T> {
     if (this._hoveredDetails === null) return false;
     return this._hoveredDetails.index === row.index;
   }
+
+  protected isRowActionColumn(meta: ColumnMeta | undefined): meta is RowActionColumnMeta {
+    return !!meta && meta.kind === 'rowActions';
+  }
 }
 
 interface Row<T> {
@@ -118,4 +125,12 @@ interface Row<T> {
 interface HoveredDetails {
   id: string;
   index: number;
+}
+
+interface ColumnMeta {
+  kind?: 'rowActions' | string;
+}
+
+interface RowActionColumnMeta extends ColumnMeta {
+  kind: 'rowActions';
 }

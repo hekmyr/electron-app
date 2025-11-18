@@ -7,6 +7,7 @@ import { ShellComponent } from "@libs/app/shell.component";
 import { TableComponent } from '@libs/app/table.component';
 import { provideIcons } from "@ng-icons/core";
 import { lucidePenLine, lucidePlus, lucideTrash2 } from "@ng-icons/lucide";
+import type { CellContext } from "@tanstack/angular-table";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 
 const quickActions: QuickAction[] = [
@@ -60,6 +61,8 @@ export class CustomersPage {
   protected readonly _quickActions = quickActions;
   protected readonly _rowActions = rowActions;
 
+  private static readonly _columnMeta: ColumnMeta = { kind: 'rowActions' };
+
   protected readonly _breadcrumbs: BreadcrumbItem[] = [
     { label: "Customers", url: "/customers" }
   ];
@@ -107,7 +110,13 @@ export class CustomersPage {
       header: 'Created',
       enableSorting: false,
       cell: (info: { getValue<T>(): () => T }) => `${info.getValue<Date>()}`,
-    }
+    },
+    {
+      id: 'rowActions',
+      enableHiding: false,
+      meta: CustomersPage._columnMeta,
+      cell: ({ row }: CellContext<CustomerDTO, unknown>) => row.original,
+    },
   ];
 
   constructor() {
@@ -122,4 +131,8 @@ export function provideActionIcons(actions: QuickAction[]) {
     icons[a.icon.key] = a.icon.value;
   }
   return icons;
+}
+
+interface ColumnMeta {
+  kind?: 'rowActions';
 }

@@ -4,8 +4,8 @@ import { HlmButton } from "@libs/ui/button/src";
 import { NgIcon } from "@ng-icons/core";
 
 @Component({
-    selector: 'app-actions',
-    imports: [HlmButton, NgIcon],
+  selector: 'app-actions',
+  imports: [HlmButton, NgIcon],
     template: `
       <div class="flex gap-2">
         @let actions = actionSignal();
@@ -13,7 +13,7 @@ import { NgIcon } from "@ng-icons/core";
           <button
             hlmBtn
             variant="ghost"
-            (click)="item.onClick()"
+            (click)="handleAction(item)"
           >
             <ng-icon hlm [name]="item.icon.name" />
           </button>
@@ -23,10 +23,16 @@ import { NgIcon } from "@ng-icons/core";
 })
 export class ActionsComponent {
   public readonly actionSignal = input.required<Action[]>({alias: 'actions'});
+  public readonly contextSignal = input<any>(null, { alias: 'context' });
+
+  protected handleAction(action: Action) {
+    action.onClick?.(this.contextSignal());
+  }
 }
 
-export interface Action {
+export interface Action<T = unknown> {
   label: string;
   icon: Icon,
-  onClick: () => void;
+  onClick: (context?: T | null) => void;
+  dialog?: string;
 }
