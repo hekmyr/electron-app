@@ -1,14 +1,15 @@
 import { DataService, DataServiceImpl } from "@/shared/services/data";
 import { IconValue } from "@/shared/types/icon";
 import { Component, inject } from "@angular/core";
-import { Action } from "@libs/app/actions.component";
+import { Action } from "@libs/customer/customer-actions.component";
 import { BreadcrumbItem, QuickAction } from "@libs/app/header.component";
 import { ShellComponent } from "@libs/app/shell.component";
-import { TableComponent } from '@libs/app/table.component';
+import { CustomerTableComponent } from '@libs/customer/customer-table.component';
+import { CustomerFormComponent } from "@libs/customer/customer-form.component";
 import { provideIcons } from "@ng-icons/core";
-import { lucidePenLine, lucidePlus, lucideTrash2 } from "@ng-icons/lucide";
-import type { CellContext } from "@tanstack/angular-table";
+import { lucidePenLine, lucidePlus } from "@ng-icons/lucide";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
+import type { CellContext } from "@tanstack/angular-table";
 
 const quickActions: QuickAction[] = [
   {
@@ -17,24 +18,30 @@ const quickActions: QuickAction[] = [
   }
 ];
 
-const rowActions: Action[] = [
+const rowActions: Action<CustomerDTO>[] = [
   { 
     label: 'Edit',
     icon: { name: 'lucide-pen-line', value: lucidePenLine, key: 'lucidePenLine' },
-    onClick: () => { }
+    execute: () => { },
+    dialog: {
+      title: 'Edit customer',
+      description: 'Update the customer informations and save your changes.',
+      component: CustomerFormComponent,
+      inputs: (customer) => ({ customer }),
+    },
   },
-  {
-    label: 'Delete',
-    icon: { name: 'lucide-trash-2', value: lucideTrash2, key: 'lucideTrash2' },
-    onClick: () => { }
-  }
+  // {
+  //   label: 'Delete',
+  //   icon: { name: 'lucide-trash-2', value: lucideTrash2, key: 'lucideTrash2' },
+  //   onClick: () => { }
+  // }
 ];
 
 @Component({
   selector: 'app-customers',
   imports: [
     ShellComponent,
-    TableComponent
+    CustomerTableComponent
   ],
   template: `
     <app-shell
@@ -125,7 +132,7 @@ export class CustomersPage {
   }
 }
 
-export function provideActionIcons(actions: QuickAction[]) {
+export function provideActionIcons(actions: { icon: { key: string; value: IconValue } }[]) {
   let icons: Record<string, IconValue> = {};
   for (const a of actions) {
     icons[a.icon.key] = a.icon.value;

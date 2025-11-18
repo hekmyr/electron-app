@@ -2,7 +2,7 @@ import { Component, input } from "@angular/core";
 import { HlmTable, HlmTableContainer, HlmTBody, HlmTd, HlmTh, HlmTHead, HlmTr } from "@libs/ui/table/src";
 import type { ColumnDef } from '@tanstack/angular-table';
 import { createAngularTable, FlexRenderDirective, getCoreRowModel } from '@tanstack/angular-table';
-import { Action, ActionsComponent } from "./actions.component";
+import { Action, CustomerActionsComponent } from "./customer-actions.component";
 
 @Component({
 	selector: 'app-table',
@@ -16,7 +16,7 @@ import { Action, ActionsComponent } from "./actions.component";
     HlmTr,
     HlmTh,
     HlmTd,
-    ActionsComponent
+    CustomerActionsComponent
   ],
 	template: `
 		<!-- we defer the loading of the table, because tanstack manipulates the DOM with flexRender which can cause errors during SSR -->
@@ -55,9 +55,9 @@ import { Action, ActionsComponent } from "./actions.component";
                   >
                     @if (isRowActionColumn(cell.column.columnDef.meta)) {
                       @if (isLineHovered(row)) {
-                        <app-actions
+                        <customer-actions
                           [actions]="actionsSignal()"
-                          [context]="cell.getValue()"
+                          [context]="row.original"
                         />
                       }
                     } @else {
@@ -81,10 +81,10 @@ import { Action, ActionsComponent } from "./actions.component";
 		}
 	`,
 })
-export class TableComponent<T> {
+export class CustomerTableComponent<T> {
 	public readonly columnsSignal = input.required<ColumnDef<T, any>[]>({ alias: 'columns' });
 	public readonly dataSignal = input.required<T[]>({ alias: 'data' });
-  public readonly actionsSignal = input<Action[]>([], { alias: 'actions' });
+  public readonly actionsSignal = input<Action<T>[]>([], { alias: 'actions' });
   
   protected _hoveredDetails: HoveredDetails | null = null;
 
