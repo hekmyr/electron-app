@@ -1,9 +1,9 @@
 import { Component, input } from "@angular/core";
 import { HlmTable, HlmTableContainer, HlmTBody, HlmTd, HlmTh, HlmTHead, HlmTr } from "@libs/ui/table/src";
+import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 import type { ColumnDef } from '@tanstack/angular-table';
 import { createAngularTable, FlexRenderDirective, getCoreRowModel } from '@tanstack/angular-table';
 import { CustomerAction, CustomerActionsComponent } from "./customer-actions.component";
-import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 
 @Component({
   selector: 'app-table',

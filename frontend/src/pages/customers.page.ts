@@ -1,12 +1,10 @@
 import { DataService, DataServiceImpl } from "@/shared/services/data";
 import { IconValue } from "@/shared/types/icon";
 import { Component, inject, signal } from "@angular/core";
-import { CustomerAction } from "@libs/customer/customer-actions.component";
 import { BreadcrumbItem, QuickAction } from "@libs/app/header.component";
 import { ShellComponent } from "@libs/app/shell.component";
+import { CustomerAction } from "@libs/customer/customer-actions.component";
 import { CustomerTableComponent } from '@libs/customer/customer-table.component';
-import { CustomerFormComponent } from "@libs/customer/customer-form.component";
-import { CustomerDeleteConfirmComponent } from "@libs/customer/customer-delete-confirm.component";
 import { provideIcons } from "@ng-icons/core";
 import { lucidePenLine, lucidePlus, lucideTrash2 } from "@ng-icons/lucide";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
