@@ -10,6 +10,11 @@ import { lucidePenLine, lucidePlus, lucideTrash2 } from "@ng-icons/lucide";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 import type { CellContext } from "@tanstack/angular-table";
 
+import { HlmAlertDialogImports } from "@libs/ui/alert-dialog/src";
+import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
+import { HlmButton } from "@libs/ui/button/src";
+import { CustomerFormComponent } from "@libs/customer/customer-form.component";
+
 const quickActions: QuickAction[] = [
   {
     icon: { name: 'lucide-plus', value: lucidePlus, key: 'lucidePlus' },
@@ -21,7 +26,12 @@ const quickActions: QuickAction[] = [
   selector: 'app-customers',
   imports: [
     ShellComponent,
-    CustomerTableComponent
+
+    CustomerTableComponent,
+    HlmAlertDialogImports,
+    BrnAlertDialogImports,
+    HlmButton,
+    CustomerFormComponent
   ],
   template: `
     <app-shell
@@ -33,6 +43,44 @@ const quickActions: QuickAction[] = [
         [columns]="_columns"
         [actions]="_rowActions"
       />
+
+      <hlm-alert-dialog>
+        <button
+          id="add-customer-trigger"
+          class="hidden"
+          brnAlertDialogTrigger
+        ></button>
+        <hlm-alert-dialog-content *brnAlertDialogContent="let ctx">
+          <hlm-alert-dialog-header>
+            <h2 hlmAlertDialogTitle>Add customer</h2>
+            <p hlmAlertDialogDescription>
+              Create a new customer.
+            </p>
+          </hlm-alert-dialog-header>
+
+          <customer-form
+            #formComponent
+            (save)="handleCreate($event, ctx)"
+          />
+
+          <hlm-alert-dialog-footer>
+            <button
+              hlmAlertDialogCancel
+              variant="ghost"
+              (click)="ctx.close()"
+            >
+              Cancel
+            </button>
+            <button
+              hlmBtn
+              variant="default"
+              (click)="formComponent.submit()"
+            >
+              Create customer
+            </button>
+          </hlm-alert-dialog-footer>
+        </hlm-alert-dialog-content>
+      </hlm-alert-dialog>
     </app-shell>
   `,
   providers: [
@@ -108,7 +156,11 @@ export class CustomersPage {
     },
   ];
 
+
+
   constructor() {
+    this._quickActions[0].onClick = () => document.getElementById('add-customer-trigger')?.click();
+
     this._dataService = inject(DataServiceImpl);
     this._customersMap = this._dataService.customers.findCustomers(40);
     this._customers.set(Array.from(this._customersMap.values()));
@@ -158,6 +210,14 @@ export class CustomersPage {
     this._dataService
       .customers
       .deleteCustomer(id);
+  }
+
+  protected handleCreate(event: { id: string; customer: CustomerDTO }, ctx: { close: () => void }) {
+    this._customersMap.set(event.id, event.customer);
+    this._customers.set(Array.from(this._customersMap.values()));
+
+    this._dataService.customers.createCustomer(event.customer);
+    ctx.close();
   }
 }
 
