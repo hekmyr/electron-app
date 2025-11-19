@@ -19,7 +19,7 @@ import { CustomerFormComponent } from "./customer-form.component";
     BrnAlertDialogImports,
     CustomerFormComponent
   ],
-    template: `
+  template: `
       <div class="flex gap-2">
         @let actions = actionSignal();
         @for (item of actions; track item.label) {
@@ -76,10 +76,10 @@ import { CustomerFormComponent } from "./customer-form.component";
     `
 })
 export class CustomerActionsComponent {
-  public readonly actionSignal = input.required<Action<CustomerDTO>[]>({alias: 'actions'});
-  public readonly contextSignal = input.required<CustomerDTO>({alias: 'context'});
+  public readonly actionSignal = input.required<CustomerAction[]>({ alias: 'actions' });
+  public readonly contextSignal = input.required<CustomerDTO>({ alias: 'context' });
 
-  protected buildDialogInputs(action: Action<CustomerDTO>) {
+  protected buildDialogInputs(action: CustomerAction) {
     const context = this.contextSignal();
     return action.dialog.inputs(context);
   }
@@ -88,26 +88,24 @@ export class CustomerActionsComponent {
     return 'save' in inputs && typeof inputs['save'] === 'function';
   }
 
-  protected handleFormSave(event: { id: string; customer: CustomerDTO }, action: Action<CustomerDTO>, dialog: DialogContext) {
-    
+  protected handleFormSave(event: { id: string; customer: CustomerDTO }, action: CustomerAction, dialog: DialogContext) {
+
     const inputs = this.buildDialogInputs(action);
     if (this.hasSaveCallback(inputs)) {
       inputs.save(event);
     }
-    
+
     dialog.close();
   }
 }
 
-export interface Action<T> {
+export interface CustomerAction {
   label: string;
   icon: Icon,
-  execute: () => void;
-  dialog: ActionDialog<T>;
+  dialog: CustomerActionDialog;
 }
 
-export interface ActionDialog<T> {
-  component: Type<any>;
+export interface CustomerActionDialog {
   title?: string;
   description?: string;
   cancelLabel?: string;

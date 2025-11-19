@@ -1,7 +1,7 @@
 import { DataService, DataServiceImpl } from "@/shared/services/data";
 import { IconValue } from "@/shared/types/icon";
 import { Component, inject, signal } from "@angular/core";
-import { Action } from "@libs/customer/customer-actions.component";
+import { CustomerAction } from "@libs/customer/customer-actions.component";
 import { BreadcrumbItem, QuickAction } from "@libs/app/header.component";
 import { ShellComponent } from "@libs/app/shell.component";
 import { CustomerTableComponent } from '@libs/customer/customer-table.component';
@@ -48,7 +48,7 @@ export class CustomersPage {
   private readonly _customersMap: Map<string, CustomerDTO>;
 
   protected readonly _quickActions = quickActions;
-  protected readonly _rowActions: Action<CustomerDTO>[];
+  protected readonly _rowActions: CustomerAction[];
 
   private static readonly _columnMeta: ColumnMeta = { kind: 'rowActions' };
 
@@ -60,10 +60,10 @@ export class CustomersPage {
   protected readonly _columns = [
     {
       accessorKey: 'id',
-       id: 'id',
-        header: 'ID',
-        enableSorting: false,
-        cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
+      id: 'id',
+      header: 'ID',
+      enableSorting: false,
+      cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
     },
     {
       accessorKey: 'email',
@@ -114,15 +114,13 @@ export class CustomersPage {
     this._customers.set(Array.from(this._customersMap.values()));
 
     this._rowActions = [
-      { 
+      {
         label: 'Edit',
         icon: { name: 'lucide-pen-line', value: lucidePenLine, key: 'lucidePenLine' },
-        execute: () => { },
         dialog: {
           title: 'Edit customer',
           description: 'Update the customer informations and save your changes.',
-          component: CustomerFormComponent,
-          inputs: (customer) => ({ 
+          inputs: (customer: CustomerDTO) => ({
             customer,
             save: (result: { id: string; customer: CustomerDTO }) => this.updateCustomer(result)
           }),
