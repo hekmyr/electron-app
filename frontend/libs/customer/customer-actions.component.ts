@@ -1,19 +1,17 @@
 import { Icon } from "@/shared/types/icon";
-import { Component, Type, input, ViewChild } from "@angular/core";
-import { NgComponentOutlet } from "@angular/common";
+import { Component, input } from "@angular/core";
 import { HlmAlertDialogImports } from "@libs/ui/alert-dialog/src";
 import { HlmButton } from "@libs/ui/button/src";
 import { NgIcon } from "@ng-icons/core";
-import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
-import { CustomerFormComponent } from "./customer-form.component";
+import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
 import { CustomerDeleteConfirmComponent } from "./customer-delete-confirm.component";
+import { CustomerFormComponent } from "./customer-form.component";
 
 @Component({
   selector: 'customer-actions',
   standalone: true,
   imports: [
-    NgComponentOutlet,
     HlmButton,
     NgIcon,
     HlmAlertDialogImports,
@@ -139,7 +137,7 @@ export class CustomerActionsComponent {
     dialog.close();
   }
 
-  protected handleConfirm(event: { id: string }, action: Action<CustomerDTO>, dialog: DialogContext) {
+  protected handleConfirm(event: { id: string }, action: CustomerAction, dialog: DialogContext) {
     const inputs = this.buildDialogInputs(action);
     if (this.hasConfirmCallback(inputs)) {
       inputs.confirm(event);
