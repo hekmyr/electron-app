@@ -95,6 +95,20 @@ import { CustomerDeleteConfirmComponent } from "./customer-delete-confirm.compon
                     </button>
                   </hlm-alert-dialog-footer>
                 }
+                @default {
+                  <div class="p-4">
+                    <p class="text-destructive">Action "{{ item.label }}" is not implemented.</p>
+                    <hlm-alert-dialog-footer class="mt-4">
+                      <button
+                        hlmBtn
+                        variant="ghost"
+                        (click)="dialogCtx.close()"
+                      >
+                        Close
+                      </button>
+                    </hlm-alert-dialog-footer>
+                  </div>
+                }
               }
             </hlm-alert-dialog-content>
           </hlm-alert-dialog>
