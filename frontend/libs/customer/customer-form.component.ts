@@ -64,7 +64,6 @@ export class CustomerFormComponent implements OnInit {
 
   public ngOnInit() {
     const customer = this.customerSignal();
-    console.log(customer);
     if (customer) {
       const birthdate = customer.birthdate.toISOString().split('T')[0];
       this.form.patchValue({
