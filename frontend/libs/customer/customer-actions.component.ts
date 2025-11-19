@@ -139,7 +139,7 @@ export class CustomerActionsComponent {
     dialog.close();
   }
 
-  protected handleConfirm(event: { id: string }, action: Action<CustomerDTO>, dialog: DialogContext) {
+  protected handleConfirm(event: { id: string }, action: CustomerAction, dialog: DialogContext) {
     const inputs = this.buildDialogInputs(action);
     if (this.hasConfirmCallback(inputs)) {
       inputs.confirm(event);

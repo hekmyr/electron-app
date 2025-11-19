@@ -131,11 +131,9 @@ export class CustomersPage {
       {
         label: 'Delete',
         icon: { name: 'lucide-trash-2', value: lucideTrash2, key: 'lucideTrash2' },
-        execute: () => { },
         dialog: {
           title: 'Delete customer',
           description: 'This action cannot be undone.',
-          component: CustomerDeleteConfirmComponent,
           confirmLabel: 'Delete',
           inputs: (customer) => ({
             customer,
