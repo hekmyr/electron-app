@@ -1,37 +1,22 @@
 import { DataService, DataServiceImpl } from "@/shared/services/data";
 import { IconValue } from "@/shared/types/icon";
-import { Component, inject, signal } from "@angular/core";
+import { Component, ViewChild, inject, signal } from "@angular/core";
 import { BreadcrumbItem, QuickAction } from "@libs/app/header.component";
 import { ShellComponent } from "@libs/app/shell.component";
 import { CustomerAction } from "@libs/customer/customer-actions.component";
+import { CustomerAddDialogComponent } from "@libs/customer/customer-add-dialog.component";
 import { CustomerTableComponent } from '@libs/customer/customer-table.component';
 import { provideIcons } from "@ng-icons/core";
 import { lucidePenLine, lucidePlus, lucideTrash2 } from "@ng-icons/lucide";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 import type { CellContext } from "@tanstack/angular-table";
 
-import { HlmAlertDialogImports } from "@libs/ui/alert-dialog/src";
-import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
-import { HlmButton } from "@libs/ui/button/src";
-import { CustomerFormComponent } from "@libs/customer/customer-form.component";
-
-const quickActions: QuickAction[] = [
-  {
-    icon: { name: 'lucide-plus', value: lucidePlus, key: 'lucidePlus' },
-    onClick: () => { }
-  }
-];
-
 @Component({
   selector: 'app-customers',
   imports: [
     ShellComponent,
-
     CustomerTableComponent,
-    HlmAlertDialogImports,
-    BrnAlertDialogImports,
-    HlmButton,
-    CustomerFormComponent
+    CustomerAddDialogComponent
   ],
   template: `
     <app-shell
@@ -43,44 +28,10 @@ const quickActions: QuickAction[] = [
         [columns]="_columns"
         [actions]="_rowActions"
       />
-
-      <hlm-alert-dialog>
-        <button
-          id="add-customer-trigger"
-          class="hidden"
-          brnAlertDialogTrigger
-        ></button>
-        <hlm-alert-dialog-content *brnAlertDialogContent="let ctx">
-          <hlm-alert-dialog-header>
-            <h2 hlmAlertDialogTitle>Add customer</h2>
-            <p hlmAlertDialogDescription>
-              Create a new customer.
-            </p>
-          </hlm-alert-dialog-header>
-
-          <customer-form
-            #formComponent
-            (save)="handleCreate($event, ctx)"
-          />
-
-          <hlm-alert-dialog-footer>
-            <button
-              hlmAlertDialogCancel
-              variant="ghost"
-              (click)="ctx.close()"
-            >
-              Cancel
-            </button>
-            <button
-              hlmBtn
-              variant="default"
-              (click)="formComponent.submit()"
-            >
-              Create customer
-            </button>
-          </hlm-alert-dialog-footer>
-        </hlm-alert-dialog-content>
-      </hlm-alert-dialog>
+      <customer-add-dialog
+        #addDialog
+        (save)="handleCreate($event)"
+      />
     </app-shell>
   `,
   providers: [
@@ -95,7 +46,14 @@ export class CustomersPage {
   private readonly _dataService: DataService;
   private readonly _customersMap: Map<string, CustomerDTO>;
 
-  protected readonly _quickActions = quickActions;
+  @ViewChild('addDialog') protected readonly addDialog!: CustomerAddDialogComponent;
+
+  protected readonly _quickActions: QuickAction[] = [
+    {
+      icon: { name: 'lucide-plus', value: lucidePlus, key: 'lucidePlus' },
+      onClick: () => this.addDialog.open()
+    }
+  ];
   protected readonly _rowActions: CustomerAction[];
 
   private static readonly _columnMeta: ColumnMeta = { kind: 'rowActions' };
@@ -156,11 +114,7 @@ export class CustomersPage {
     },
   ];
 
-
-
   constructor() {
-    this._quickActions[0].onClick = () => document.getElementById('add-customer-trigger')?.click();
-
     this._dataService = inject(DataServiceImpl);
     this._customersMap = this._dataService.customers.findCustomers(40);
     this._customers.set(Array.from(this._customersMap.values()));
@@ -212,12 +166,11 @@ export class CustomersPage {
       .deleteCustomer(id);
   }
 
-  protected handleCreate(event: { id: string; customer: CustomerDTO }, ctx: { close: () => void }) {
+  protected handleCreate(event: { id: string; customer: CustomerDTO }) {
     this._customersMap.set(event.id, event.customer);
     this._customers.set(Array.from(this._customersMap.values()));
 
     this._dataService.customers.createCustomer(event.customer);
-    ctx.close();
   }
 }
 
