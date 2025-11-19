@@ -82,7 +82,6 @@ export class CustomerFormComponent implements OnInit {
     if (this.form.invalid || !customer) return;
 
     const formValues = this.form.getRawValue();
-    console.log(formValues);
     const updatedCustomer: CustomerDTO = {
       ...customer,
       ...formValues,
