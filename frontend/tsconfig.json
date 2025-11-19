@@ -19,8 +19,12 @@
       "@shared/*": [
         "../shared/*"
       ],
-      "@/*": ["./src/*"],
-      "@libs/*": ["./libs/*"],
+      "@/*": [
+        "./src/*"
+      ],
+      "@libs/*": [
+        "./libs/*"
+      ],
       "@spartan-ng/helm/breadcrumb": [
         "./libs/ui/breadcrumb/src/index.ts"
       ],
@@ -50,6 +54,9 @@
       ],
       "@spartan-ng/helm/skeleton": [
         "./libs/ui/skeleton/src/index.ts"
+      ],
+      "@spartan-ng/helm/alert-dialog": [
+        "./libs/ui/alert-dialog/src/index.ts"
       ]
     }
   },
