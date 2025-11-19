@@ -2,13 +2,13 @@ import { Component, input } from "@angular/core";
 import { HlmTable, HlmTableContainer, HlmTBody, HlmTd, HlmTh, HlmTHead, HlmTr } from "@libs/ui/table/src";
 import type { ColumnDef } from '@tanstack/angular-table';
 import { createAngularTable, FlexRenderDirective, getCoreRowModel } from '@tanstack/angular-table';
-import { Action, CustomerActionsComponent } from "./customer-actions.component";
+import { CustomerAction, CustomerActionsComponent } from "./customer-actions.component";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 
 @Component({
-	selector: 'app-table',
-	standalone: true,
-	imports: [
+  selector: 'app-table',
+  standalone: true,
+  imports: [
     HlmTable,
     FlexRenderDirective,
     HlmTableContainer,
@@ -19,7 +19,7 @@ import { CustomerDTO } from "@shared/dto/customer-dto.interface";
     HlmTd,
     CustomerActionsComponent
   ],
-	template: `
+  template: `
 		<!-- we defer the loading of the table, because tanstack manipulates the DOM with flexRender which can cause errors during SSR -->
 		@defer {
 		  <div hlmTableContainer>
@@ -83,17 +83,17 @@ import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 	`,
 })
 export class CustomerTableComponent<T> {
-	public readonly columnsSignal = input.required<ColumnDef<CustomerDTO, any>[]>({ alias: 'columns' });
-	public readonly dataSignal = input.required<CustomerDTO[]>({ alias: 'data' });
-  public readonly actionsSignal = input<Action<T>[]>([], { alias: 'actions' });
-  
+  public readonly columnsSignal = input.required<ColumnDef<CustomerDTO, any>[]>({ alias: 'columns' });
+  public readonly dataSignal = input.required<CustomerDTO[]>({ alias: 'data' });
+  public readonly actionsSignal = input<CustomerAction[]>([], { alias: 'actions' });
+
   protected _hoveredDetails: HoveredDetails | null = null;
 
-	protected readonly _table = createAngularTable<CustomerDTO>(() => ({
-		data: this.dataSignal(),
-		columns: this.columnsSignal(),
-		getCoreRowModel: getCoreRowModel(),
-	}));
+  protected readonly _table = createAngularTable<CustomerDTO>(() => ({
+    data: this.dataSignal(),
+    columns: this.columnsSignal(),
+    getCoreRowModel: getCoreRowModel(),
+  }));
 
   setHoveredDetails(rowDetails: Row<CustomerDTO> | null) {
     if (rowDetails === null) {
