@@ -16,7 +16,6 @@ import { ColumnDef } from "@tanstack/angular-table";
 
 @Component({
   selector: 'app-packages',
-  standalone: true,
   imports: [
     ShellComponent,
     ResourceTableComponent,
