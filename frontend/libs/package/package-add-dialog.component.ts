@@ -1,4 +1,4 @@
-import { Component, ElementRef, output, viewChild, ViewChild } from "@angular/core";
+import { Component, ElementRef, output, viewChild } from "@angular/core";
 import { HlmAlertDialogImports } from "@libs/ui/alert-dialog/src";
 import { HlmButton } from "@libs/ui/button/src";
 import { PackageDTO } from "@shared/dto/package-dto.interface";
