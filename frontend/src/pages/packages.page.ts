@@ -121,26 +121,31 @@ export class PackagesPage {
 
   protected readonly _columns: ColumnDef<PackageDTO>[] = [
     {
+      id: 'id',
       accessorKey: 'id',
       header: 'ID',
       cell: info => info.getValue()
     },
     {
+      id: 'name',
       accessorKey: 'name',
       header: 'Name',
       cell: info => info.getValue()
     },
     {
+      id: 'status',
       accessorKey: 'status',
       header: 'Status',
       cell: info => info.getValue()
     },
     {
+      id: 'description',
       accessorKey: 'description',
       header: 'Description',
       cell: info => info.getValue()
     },
     {
+      id: 'receivedAt',
       accessorKey: 'receivedAt',
       header: 'Received At',
       cell: info => info.getValue()
