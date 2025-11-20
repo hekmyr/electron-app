@@ -1,41 +1,91 @@
 import { DataService, DataServiceImpl } from "@/shared/services/data";
-import { IconValue } from "@/shared/types/icon";
-import { Component, inject, signal } from "@angular/core";
+import { Component, ElementRef, inject, signal, viewChild } from "@angular/core";
 import { BreadcrumbItem, QuickAction } from "@libs/app/header.component";
+import { ResourceAction, ResourceTableComponent } from "@libs/app/resource-table/src";
 import { ShellComponent } from "@libs/app/shell.component";
-import { CustomerAction } from "@libs/customer/customer-actions.component";
-import { CustomerTableComponent } from '@libs/customer/customer-table.component';
+import { CustomerAddDialogComponent } from "@libs/customer/customer-add-dialog.component";
+import { CustomerDeleteConfirmComponent } from "@libs/customer/customer-delete-confirm.component";
+import { CustomerFormComponent } from "@libs/customer/customer-form.component";
+import { HlmAlertDialogImports } from "@libs/ui/alert-dialog/src";
+import { HlmButton } from "@libs/ui/button/src";
 import { provideIcons } from "@ng-icons/core";
 import { lucidePenLine, lucidePlus, lucideTrash2 } from "@ng-icons/lucide";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
-import type { CellContext } from "@tanstack/angular-table";
-
-const quickActions: QuickAction[] = [
-  {
-    icon: { name: 'lucide-plus', value: lucidePlus, key: 'lucidePlus' },
-    onClick: () => { }
-  }
-];
+import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
+import type { ColumnDef } from "@tanstack/angular-table";
 
 @Component({
   selector: 'app-customers',
   imports: [
     ShellComponent,
-    CustomerTableComponent
+    ResourceTableComponent,
+    CustomerAddDialogComponent,
+    CustomerFormComponent,
+    CustomerDeleteConfirmComponent,
+    HlmAlertDialogImports,
+    BrnAlertDialogImports,
+    HlmButton
   ],
   template: `
     <app-shell
       [breadcrumbs]="_breadcrumbs"
       [actions]="_quickActions"
     >
-      <app-table
+      <resource-table
         [data]="_customers()"
         [columns]="_columns"
         [actions]="_rowActions"
       />
+      <customer-add-dialog
+        #addDialogRef
+        (save)="handleCreate($event)"
+      />
+
+      @let selectedCustomer = _selectedCustomerSignal();
+      <!-- Edit Dialog -->
+      <hlm-alert-dialog>
+        <button #editTriggerRef class="hidden" brnAlertDialogTrigger></button>
+        <hlm-alert-dialog-content *brnAlertDialogContent="let ctx">
+          <hlm-alert-dialog-header>
+            <h2 hlmAlertDialogTitle>Edit customer</h2>
+          </hlm-alert-dialog-header>
+          <customer-form
+            #editForm
+            [customer]="selectedCustomer"
+            (save)="handleEditSave($event, ctx)"
+          />
+          <hlm-alert-dialog-footer>
+            <button hlmAlertDialogCancel variant="ghost" (click)="ctx.close()">Cancel</button>
+            <button hlmBtn variant="default" (click)="editForm.submit()">Save changes</button>
+          </hlm-alert-dialog-footer>
+        </hlm-alert-dialog-content>
+      </hlm-alert-dialog>
+
+      <!-- Delete Dialog -->
+      <hlm-alert-dialog>
+        <button #deleteTriggerRef class="hidden" brnAlertDialogTrigger></button>
+        <hlm-alert-dialog-content *brnAlertDialogContent="let ctx">
+          <hlm-alert-dialog-header>
+            <h2 hlmAlertDialogTitle>Delete customer</h2>
+            <p hlmAlertDialogDescription>This action cannot be undone.</p>
+          </hlm-alert-dialog-header>
+          @if (selectedCustomer) {
+            <customer-delete-confirm
+              #deleteConfirm
+              [customer]="selectedCustomer!"
+              (confirm)="handleDeleteConfirm($event, ctx)"
+            />
+            <hlm-alert-dialog-footer>
+              <button hlmAlertDialogCancel variant="ghost" (click)="ctx.close()">Cancel</button>
+              <button hlmBtn variant="destructive" (click)="deleteConfirm.submit()">Delete</button>
+            </hlm-alert-dialog-footer>
+          }
+        </hlm-alert-dialog-content>
+      </hlm-alert-dialog>
     </app-shell>
   `,
   providers: [
+    // Provide icons for row actions and header actions
     provideIcons({
       lucidePenLine,
       lucidePlus,
@@ -47,99 +97,124 @@ export class CustomersPage {
   private readonly _dataService: DataService;
   private readonly _customersMap: Map<string, CustomerDTO>;
 
-  protected readonly _quickActions = quickActions;
-  protected readonly _rowActions: CustomerAction[];
+  protected readonly _addDialogRefSignal = viewChild.required<CustomerAddDialogComponent>('addDialogRef');
+  protected readonly _editTriggerRefSignal = viewChild.required<ElementRef<HTMLButtonElement>>('editTriggerRef');
+  protected readonly _deleteTriggerRef = viewChild.required<ElementRef<HTMLButtonElement>>('deleteTriggerRef');
 
-  private static readonly _columnMeta: ColumnMeta = { kind: 'rowActions' };
+  protected readonly _selectedCustomerSignal = signal<CustomerDTO | undefined>(undefined);
+
+  protected readonly _quickActions: QuickAction[] = [
+    {
+      icon: { name: 'lucide-plus', value: lucidePlus, key: 'lucidePlus' },
+      onClick: () => {
+        const addDialogRef = this._addDialogRefSignal();
+        addDialogRef.open();
+      }
+    }
+  ];
+
+  protected readonly _rowActions: ResourceAction<CustomerDTO>[] = [
+    {
+      label: 'Edit',
+      icon: 'lucidePenLine',
+      onClick: (customer) => this.openEdit(customer)
+    },
+    {
+      label: 'Delete',
+      icon: 'lucideTrash2',
+      variant: 'destructive',
+      onClick: (customer) => this.openDelete(customer)
+    }
+  ];
 
   protected readonly _breadcrumbs: BreadcrumbItem[] = [
     { label: "Customers", url: "/customers" }
   ];
 
   protected readonly _customers = signal<CustomerDTO[]>([]);
-  protected readonly _columns = [
+  protected readonly _columns: ColumnDef<CustomerDTO>[] = [
     {
       accessorKey: 'id',
       id: 'id',
       header: 'ID',
       enableSorting: false,
-      cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
+      cell: (info) => `${info.getValue()}`,
     },
     {
       accessorKey: 'email',
       id: 'email',
       header: 'Email',
       enableSorting: false,
-      cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
+      cell: (info) => `${info.getValue()}`,
     },
     {
       accessorKey: 'firstName',
       id: 'firstName',
       header: 'First Name',
       enableSorting: false,
-      cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
+      cell: (info) => `${info.getValue()}`,
     },
     {
       accessorKey: 'lastName',
       id: 'lastName',
       header: 'Last Name',
       enableSorting: false,
-      cell: (info: { getValue<T>(): () => T }) => `${info.getValue<string>()}`,
+      cell: (info) => `${info.getValue()}`,
     },
     {
       accessorKey: 'birthdate',
       id: 'birthdate',
       header: 'Age',
       enableSorting: false,
-      cell: (info: { getValue<T>(): () => T }) => `${info.getValue<Date>()}`,
+      cell: (info) => `${info.getValue()}`,
     },
     {
       accessorKey: 'createdAt',
       id: 'createdAt',
       header: 'Created',
       enableSorting: false,
-      cell: (info: { getValue<T>(): () => T }) => `${info.getValue<Date>()}`,
+      cell: (info) => `${info.getValue()}`,
     },
     {
-      id: 'rowActions',
-      enableHiding: false,
-      meta: CustomersPage._columnMeta,
-      cell: ({ row }: CellContext<CustomerDTO, unknown>) => row.original,
-    },
+      id: 'actions',
+      header: '',
+      meta: { kind: 'rowActions' }
+    }
   ];
 
   constructor() {
     this._dataService = inject(DataServiceImpl);
     this._customersMap = this._dataService.customers.findCustomers(40);
     this._customers.set(Array.from(this._customersMap.values()));
+  }
 
-    this._rowActions = [
-      {
-        label: 'Edit',
-        icon: { name: 'lucide-pen-line', value: lucidePenLine, key: 'lucidePenLine' },
-        dialog: {
-          title: 'Edit customer',
-          description: 'Update the customer informations and save your changes.',
-          inputs: (customer: CustomerDTO) => ({
-            customer,
-            save: (result: { id: string; customer: CustomerDTO }) => this.updateCustomer(result)
-          }),
-        },
-      },
-      {
-        label: 'Delete',
-        icon: { name: 'lucide-trash-2', value: lucideTrash2, key: 'lucideTrash2' },
-        dialog: {
-          title: 'Delete customer',
-          description: 'This action cannot be undone.',
-          confirmLabel: 'Delete',
-          inputs: (customer) => ({
-            customer,
-            confirm: (result: { id: string }) => this.deleteCustomer(result.id)
-          }),
-        },
-      },
-    ];
+  protected handleCreate(event: { id: string; customer: CustomerDTO }) {
+    this._customersMap.set(event.id, event.customer);
+    this._customers.set(Array.from(this._customersMap.values()));
+
+    this._dataService.customers.createCustomer(event.customer);
+  }
+
+  protected openEdit(customer: CustomerDTO) {
+    this._selectedCustomerSignal.set(customer);
+    const editTriggerRef = this._editTriggerRefSignal();
+    editTriggerRef.nativeElement.click();
+  }
+
+  protected handleEditSave(event: { id: string; customer: CustomerDTO }, ctx: { close: () => void }) {
+    this.updateCustomer(event);
+    ctx.close();
+  }
+
+  protected openDelete(customer: CustomerDTO) {
+    this._selectedCustomerSignal.set(customer);
+    const deleteTriggerRef = this._deleteTriggerRef();
+    deleteTriggerRef.nativeElement.click();
+  }
+
+  protected handleDeleteConfirm(event: { id: string }, ctx: { close: () => void }) {
+    this.deleteCustomer(event.id);
+    ctx.close();
   }
 
   private updateCustomer(result: { id: string; customer: CustomerDTO }) {
@@ -159,16 +234,4 @@ export class CustomersPage {
       .customers
       .deleteCustomer(id);
   }
-}
-
-export function provideActionIcons(actions: { icon: { key: string; value: IconValue } }[]) {
-  let icons: Record<string, IconValue> = {};
-  for (const a of actions) {
-    icons[a.icon.key] = a.icon.value;
-  }
-  return icons;
-}
-
-interface ColumnMeta {
-  kind?: 'rowActions';
 }

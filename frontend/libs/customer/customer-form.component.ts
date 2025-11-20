@@ -77,16 +77,28 @@ export class CustomerFormComponent implements OnInit {
   }
 
   public submit() {
-    const customer = this.customerSignal();
-    if (this.form.invalid || !customer) return;
+    if (this.form.invalid) return;
 
     const formValues = this.form.getRawValue();
+    const customer = this.customerSignal();
+
+    let id: string = crypto.randomUUID();
+    let createdAt = new Date();
+    let updatedAt = new Date();
+
+    if (customer) {
+      id = customer.id;
+      createdAt = customer.createdAt;
+    }
+
     const updatedCustomer: CustomerDTO = {
-      ...customer,
+      id,
+      createdAt,
+      updatedAt,
       ...formValues,
       birthdate: new Date(formValues.birthdate),
     };
 
-    this.save.emit({ id: customer.id, customer: updatedCustomer });
+    this.save.emit({ id, customer: updatedCustomer });
   }
 }
