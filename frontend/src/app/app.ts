@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { HlmBreadCrumbImports } from '@spartan-ng/helm/breadcrumb';
 import { HlmSidebarImports } from '@spartan-ng/helm/sidebar';
 import { SidebarComponent, SidebarGroup } from '@libs/app/sidebar.component';
+import { ContextService } from '@/shared/services/context';
 
 @Component({
   selector: 'app-root',
@@ -22,6 +23,8 @@ import { SidebarComponent, SidebarGroup } from '@libs/app/sidebar.component';
   `,
 })
 export class App {
+
+  private _contextService = inject(ContextService);
   protected readonly title = 'Logix';
 
   protected readonly sidebar: SidebarGroup[] = [
@@ -36,4 +39,11 @@ export class App {
       ]
     }
   ];
+
+  constructor() {
+    const electronService = window.electron;
+    if (electronService) {
+      this._contextService.electronService = electronService;
+    }
+  }
 }
