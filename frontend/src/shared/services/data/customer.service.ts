@@ -1,4 +1,5 @@
-import { createMockCustomers } from "@/shared/mock/customer.mock";
+import { MockService } from "@/shared/mock";
+import { inject } from "@angular/core";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 
 export interface CustomerService {
@@ -10,8 +11,14 @@ export interface CustomerService {
 
 export class CustomerServiceImpl implements CustomerService {
 
+    private readonly _mockService: MockService;
+
+    public constructor() {
+        this._mockService = inject(MockService);
+    }
+
     public findCustomers(limit: number): Map<string, CustomerDTO> {
-        const customers = createMockCustomers(limit);
+        const customers = this._mockService.findCustomers(limit);
         const map = new Map<string, CustomerDTO>();
         customers.forEach(customer => map.set(customer.id, customer));
         return map;
