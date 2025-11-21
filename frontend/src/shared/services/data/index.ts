@@ -1,15 +1,19 @@
-import { Injectable } from '@angular/core';
 import { CustomerService, CustomerServiceImpl } from './customer.service';
 import { PackageService, PackageServiceImpl } from './package.service';
+import { ElectronService } from '@shared/services/electron-service.interface';
 
 export interface DataService {
-    customers: CustomerService;
-    packages: PackageService;
+  customers: CustomerService;
+  packages: PackageService;
 }
 
-@Injectable({ providedIn: 'root' })
 export class DataServiceImpl implements DataService {
 
-    public readonly customers: CustomerService = new CustomerServiceImpl();
-    public readonly packages: PackageService = new PackageServiceImpl();
+  public readonly customers: CustomerService;
+  public readonly packages: PackageService;
+
+  public constructor(public _electronService: ElectronService) {
+    this.customers = new CustomerServiceImpl(this._electronService.persistence.customer);
+    this.packages = new PackageServiceImpl(this._electronService.persistence.package);
+  }
 }

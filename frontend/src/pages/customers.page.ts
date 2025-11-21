@@ -1,5 +1,6 @@
+import { ContextService } from "@/shared/services/context";
 import { DataService, DataServiceImpl } from "@/shared/services/data";
-import { Component, ElementRef, inject, signal, viewChild } from "@angular/core";
+import { Component, ElementRef, inject, OnInit, signal, viewChild } from "@angular/core";
 import { BreadcrumbItem, QuickAction } from "@libs/app/header.component";
 import { ResourceAction, ResourceTableComponent } from "@libs/app/resource-table/src";
 import { ShellComponent } from "@libs/app/shell.component";
@@ -93,9 +94,10 @@ import type { ColumnDef } from "@tanstack/angular-table";
     })
   ]
 })
-export class CustomersPage {
-  private readonly _dataService: DataService;
-  private readonly _customersMap: Map<string, CustomerDTO>;
+export class CustomersPage implements OnInit {
+  private _contextService = inject(ContextService);
+  private _dataService: DataService = new DataServiceImpl(this._contextService.electronService);
+  private _customersMap: Map<string, CustomerDTO> = new Map();
 
   protected readonly _addDialogRefSignal = viewChild.required<CustomerAddDialogComponent>('addDialogRef');
   protected readonly _editTriggerRefSignal = viewChild.required<ElementRef<HTMLButtonElement>>('editTriggerRef');
@@ -182,10 +184,10 @@ export class CustomersPage {
     }
   ];
 
-  constructor() {
-    this._dataService = inject(DataServiceImpl);
-    this._customersMap = this._dataService.customers.findCustomers(40);
+  public async ngOnInit() {
+    this._customersMap = await this._dataService.customers.findCustomers(40);
     this._customers.set(Array.from(this._customersMap.values()));
+
   }
 
   protected handleCreate(event: { id: string; customer: CustomerDTO }) {

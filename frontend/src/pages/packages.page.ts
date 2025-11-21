@@ -1,5 +1,6 @@
-import { DataService, DataServiceImpl } from "@/shared/services/data";
-import { Component, ElementRef, inject, signal, viewChild } from "@angular/core";
+import { ContextService } from "@/shared/services/context";
+import { DataServiceImpl } from "@/shared/services/data";
+import { Component, ElementRef, inject, OnInit, signal, viewChild } from "@angular/core";
 import { BreadcrumbItem, QuickAction } from "@libs/app/header.component";
 import { ResourceAction, ResourceTableComponent } from "@libs/app/resource-table/src";
 import { ShellComponent } from "@libs/app/shell.component";
@@ -43,7 +44,7 @@ import { ColumnDef } from "@tanstack/angular-table";
         [columns]="_columns"
         [actions]="_rowActions"
       />
-      
+
       <package-add-dialog
         #addDialogRef
         (save)="handleCreate($event)"
@@ -93,17 +94,19 @@ import { ColumnDef } from "@tanstack/angular-table";
     </app-shell>
   `
 })
-export class PackagesPage {
+export class PackagesPage implements OnInit {
 
-  private readonly _dataService: DataService;
-  private readonly _packagesMap: Map<string, PackageDTO>;
+  private _contextService = inject(ContextService);
+  private readonly _dataService = new DataServiceImpl(this._contextService.electronService);
+
+  private _packagesMap: Map<string, PackageDTO> = new Map();
+  protected readonly _packages = signal<PackageDTO[]>([]);
 
   protected readonly _addDialogRefSignal = viewChild.required<PackageAddDialogComponent>('addDialogRef');
   protected readonly _editTriggerRefSignal = viewChild.required<ElementRef<HTMLButtonElement>>('editTriggerRef');
   protected readonly _deleteTriggerRef = viewChild.required<ElementRef<HTMLButtonElement>>('deleteTriggerRef');
 
   protected readonly _selectedPackageSignal = signal<PackageDTO | undefined>(undefined);
-  protected readonly _packages = signal<PackageDTO[]>([]);
 
   protected readonly _breadcrumbs: BreadcrumbItem[] = [
     { label: "Packages", url: "/packages" }
@@ -171,9 +174,9 @@ export class PackagesPage {
     }
   ];
 
-  constructor() {
-    this._dataService = inject(DataServiceImpl);
-    this._packagesMap = this._dataService.packages.findPackages(50);
+
+  public async ngOnInit() {
+    this._packagesMap = await this. _dataService.packages.findPackages(50);
     this._packages.set(Array.from(this._packagesMap.values()));
   }
 
