@@ -13,6 +13,7 @@ export class CustomerRepositoryImpl implements CustomerRepository {
     const result = await this._client.customer.create({
       data: {
         email: customer.email,
+        phone: customer.phone,
         firstName: customer.firstName,
         lastName: customer.lastName,
         birthdate: customer.birthdate,
@@ -27,6 +28,14 @@ export class CustomerRepositoryImpl implements CustomerRepository {
     });
   }
 
+  async findbyPage(limit: number, page: number = 0) {
+    const skip = page * limit;
+    return this._client.customer.findMany({
+      take: limit,
+      skip
+    });
+  }
+
   async deleteById(id: string): Promise<void> {
     await this._client.customer.delete({
       where: { id }
@@ -38,6 +47,7 @@ export class CustomerRepositoryImpl implements CustomerRepository {
       where: { id },
       data: {
         email: customer.email,
+        phone: customer.phone,
         firstName: customer.firstName,
         lastName: customer.lastName,
         birthdate: customer.birthdate,

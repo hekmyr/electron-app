@@ -1,7 +1,7 @@
-import { WithoutId } from "@/shared/helper";
-import { PackageRepository } from "../../interfaces/repositories/package-repository.interface";
-import { PrismaClient } from "@prisma/client";
 import { PackageDTO } from "@/shared/dto/package-dto.interface";
+import { WithoutId } from "@/shared/helper";
+import { PrismaClient } from "@prisma/client";
+import { PackageRepository } from "../../interfaces/repositories/package-repository.interface";
 
 export class PackageRepositoryImpl implements PackageRepository {
 
@@ -14,6 +14,10 @@ export class PackageRepositoryImpl implements PackageRepository {
       data: {
         name: pkg.name,
         description: pkg.description,
+        status: pkg.status,
+        receivedAt: pkg.receivedAt,
+        deliveredAt: pkg.deliveredAt,
+        outForDeliveryAt: pkg.outForDeliveryAt,
         customerId: pkg.customerId
       }
     });
@@ -25,6 +29,14 @@ export class PackageRepositoryImpl implements PackageRepository {
       where: {
         id
       }
+    });
+  }
+
+  async findByPage(limit: number, page: number = 0) {
+    const skip = page * limit;
+    return this._client.package.findMany({
+      take: limit,
+      skip
     });
   }
 
@@ -44,6 +56,10 @@ export class PackageRepositoryImpl implements PackageRepository {
       data: {
         name: pkg.name,
         description: pkg.description,
+        status: pkg.status,
+        receivedAt: pkg.receivedAt,
+        deliveredAt: pkg.deliveredAt,
+        outForDeliveryAt: pkg.outForDeliveryAt,
         customerId: pkg.customerId
       }
     });

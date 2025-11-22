@@ -15,5 +15,8 @@ export const packageServiceImpl: PackageService = {
   },
   updateById: async (id: string, pkg: PackageDTO) => {
     await ipcRenderer.invoke('package:updateById', id, pkg);
+  },
+  findbyPage: async (limit: number, page?: number) => {
+    return await ipcRenderer.invoke('package:findbyPage', limit, page);
   }
 };

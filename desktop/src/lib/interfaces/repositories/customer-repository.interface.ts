@@ -4,6 +4,7 @@ import { WithoutId } from "@/shared/helper";
 
 export interface CustomerRepository {
   findById: (id: string) => Promise<CustomerDAO>;
+  findbyPage: (limit: number, page?: number) => Promise<CustomerDAO[]>;
   deleteById: (id: string) => Promise<void>;
   updateById: (id: string, customer: CustomerDTO) => Promise<void>;
   insert: (customer: WithoutId<CustomerDTO>) => Promise<string>;
