@@ -3,7 +3,7 @@ export interface PackageDTO {
   customerId: string;
   name: string;
   description: string;
-  status: PackageStatus;
+  status: string;
   receivedAt?: Date;
   deliveredAt?: Date;
   outForDeliveryAt?: Date;
