@@ -25,6 +25,7 @@ model Customer {
   updatedAt DateTime @updatedAt
 
   packages Package[]
+  addresses Address[]
 
   @@map("customers")
 }
@@ -44,4 +45,20 @@ model Package {
   updatedAt        DateTime  @updatedAt
 
   @@map("packages")
+}
+
+model Address {
+  id          String   @id @default(uuid()) @db.Char(36)
+  street      String
+  houseNumber String
+  boxNumber   String?
+  postalCode  String
+  city        String
+  countryCode String
+  customerId  String   @db.Char(36)
+  Customer    Customer @relation(fields: [customerId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("addresses")
 }
