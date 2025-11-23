@@ -4,6 +4,7 @@
     "moduleResolution": "nodenext",
     "target": "es2015", // prisma/_generated compatibility
     "outDir": "../dist",
+    "types": ["node"],
     "paths": {
       "@/shared/*": [
         "../shared/*"
