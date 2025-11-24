@@ -1,6 +1,7 @@
 import { ContextService } from "@/shared/services/context";
 import { DataService, DataServiceImpl } from "@/shared/services/data";
 import { AgePipe } from "@/shared/pipes/age.pipe";
+import { DateFormatPipe } from "@/shared/pipes/date-format.pipe";
 import { Component, ElementRef, inject, OnInit, signal, viewChild } from "@angular/core";
 import { BreadcrumbItem, QuickAction } from "@libs/app/header.component";
 import { ResourceAction, ResourceTableComponent } from "@libs/app/resource-table/src";
@@ -29,7 +30,8 @@ import type { ColumnDef } from "@tanstack/angular-table";
     HlmAlertDialogImports,
     BrnAlertDialogImports,
     HlmButton,
-    AgePipe
+    AgePipe,
+    DateFormatPipe
   ],
   template: `
     <app-shell
@@ -197,7 +199,10 @@ export class CustomersPage implements OnInit {
       id: 'createdAt',
       header: 'Created',
       enableSorting: false,
-      cell: (info) => `${info.getValue()}`,
+      cell: (info) => {
+        const datePipe = new DateFormatPipe();
+        return datePipe.transform(info.getValue() as Date);
+      },
     },
     {
       id: 'actions',

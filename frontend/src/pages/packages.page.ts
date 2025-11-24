@@ -1,5 +1,6 @@
 import { ContextService } from "@/shared/services/context";
 import { DataServiceImpl } from "@/shared/services/data";
+import { DateFormatPipe } from "@/shared/pipes/date-format.pipe";
 import { Component, ElementRef, inject, OnInit, signal, viewChild } from "@angular/core";
 import { BreadcrumbItem, QuickAction } from "@libs/app/header.component";
 import { ResourceAction, ResourceTableComponent } from "@libs/app/resource-table/src";
@@ -25,7 +26,8 @@ import { ColumnDef } from "@tanstack/angular-table";
     PackageDeleteConfirmComponent,
     HlmAlertDialogImports,
     BrnAlertDialogImports,
-    HlmButton
+    HlmButton,
+    DateFormatPipe
   ],
   providers: [
     provideIcons({
@@ -151,7 +153,10 @@ export class PackagesPage implements OnInit {
       id: 'receivedAt',
       accessorKey: 'receivedAt',
       header: 'Received At',
-      cell: info => info.getValue()
+      cell: info => {
+        const datePipe = new DateFormatPipe();
+        return datePipe.transform(info.getValue() as Date);
+      }
     },
     {
       id: 'actions',
@@ -176,7 +181,7 @@ export class PackagesPage implements OnInit {
 
 
   public async ngOnInit() {
-    this._packagesMap = await this. _dataService.packages.findPackages(50);
+    this._packagesMap = await this._dataService.packages.findPackages(50);
     this._packages.set(Array.from(this._packagesMap.values()));
   }
 
