@@ -1,6 +1,6 @@
 import { generateMocks } from "@/mock/generate.mock";
 import { PersistenceService } from "@shared/services/persistence-service.interface";
-import { MockAddressService, MockCustomerService, MockPackageService } from "../services/data";
+import { MockAddressService, MockCustomerService, MockDeliveryService, MockPackageService } from "../services/data";
 
 export class MockPersistenceService implements PersistenceService {
   readonly _mock = generateMocks(50);
@@ -8,4 +8,5 @@ export class MockPersistenceService implements PersistenceService {
   readonly customer = new MockCustomerService(this._mock.customers);
   readonly package = new MockPackageService(this._mock.packages);
   readonly address = new MockAddressService(this._mock.addresses);
+  readonly delivery = new MockDeliveryService(this._mock.deliveries);
 }

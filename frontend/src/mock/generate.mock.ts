@@ -1,6 +1,7 @@
 import { AddressDTO } from "@shared/dto/address-dto.interface";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 import { PackageDTO } from "@shared/dto/package-dto.interface";
+import { DeliveryDTO } from "@shared/dto/delivery-dto.interface";
 
 /**
  * Create a mock CustomerDTO
@@ -58,39 +59,69 @@ export function createMockAddress(overrides?: Partial<AddressDTO>) {
  * @param overrides - Partial fields to override on the generated mock
  */
 export function createMockPackage(overrides?: Partial<PackageDTO>) {
-    const defaults: PackageDTO = {
-        id: `${Date.now()}-${Math.floor(Math.random() * 1000000)}`,
-        name: `Package ${Math.floor(Math.random() * 100)}`,
-        description: `Description for package ${Math.floor(Math.random() * 100)}`,
-        customerId: `${Math.floor(Math.random() * 10000)}`,
-        status: 'received',
-        receivedAt: new Date(),
-        createdAt: new Date()
-    };
-    return { ...defaults, ...overrides };
+  const defaults: PackageDTO = {
+    id: `${Date.now()}-${Math.floor(Math.random() * 1000000)}`,
+    name: `Package ${Math.floor(Math.random() * 100)}`,
+    description: `Description for package ${Math.floor(Math.random() * 100)}`,
+    customerId: `${Math.floor(Math.random() * 10000)}`,
+    status: 'received',
+    receivedAt: new Date(),
+    createdAt: new Date()
+  };
+  return { ...defaults, ...overrides };
 }
 
 export function createMockPackages(count: number = 3) {
-    const customers = createMockCustomers(count);
-    const out: PackageDTO[] = [];
+  const customers = createMockCustomers(count);
+  const out: PackageDTO[] = [];
 
-    customers.forEach(customer => {
-        for (let i = 1; i <= 5; i++) {
-            out.push(createMockPackage({
-                name: `Package ${i} for ${customer.firstName}`,
-                customerId: customer.id,
-                description: `Package ${i} description for customer ${customer.id}`
-            }));
-        }
-    });
+  customers.forEach(customer => {
+    for (let i = 1; i <= 5; i++) {
+      out.push(createMockPackage({
+        name: `Package ${i} for ${customer.firstName}`,
+        customerId: customer.id,
+        description: `Package ${i} description for customer ${customer.id}`
+      }));
+    }
+  });
 
-    return out;
+  return out;
+}
+
+
+
+/**
+ * Create a mock DeliveryDTO
+ * @param overrides - Partial fields to override on the generated mock
+ */
+export function createMockDelivery(overrides?: Partial<DeliveryDTO>) {
+  const defaults: DeliveryDTO = {
+    id: `${Date.now()}-${Math.floor(Math.random() * 1000000)}`,
+    customerId: `${Math.floor(Math.random() * 10000)}`,
+    status: 'scheduled',
+    addressId: `${Math.floor(Math.random() * 10000)}`,
+    packageIds: [`${Math.floor(Math.random() * 10000)}`],
+    instructions: `Instructions for delivery ${Math.floor(Math.random() * 100)}`,
+    scheduledAt: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+  return { ...defaults, ...overrides };
+}
+
+export function createMockDeliveries(count: number = 3) {
+  const out: DeliveryDTO[] = [];
+  for (let i = 1; i <= count; i++) {
+    out.push(createMockDelivery());
+  }
+  return out;
 }
 
 export function generateMocks(customerLimit: number) {
   const customers: CustomerDTO[] = [];
   const addresses: AddressDTO[] = [];
   const packages: PackageDTO[] = [];
+  const deliveries: DeliveryDTO[] = [];
 
   for (let i = 1; i <= customerLimit; i++) {
     const customer = createMockCustomer({
@@ -101,22 +132,38 @@ export function generateMocks(customerLimit: number) {
 
     // Create 5 addresses for this customer
     for (let j = 1; j <= 5; j++) {
-      addresses.push(createMockAddress({
+      const address = createMockAddress({
         customerId: customer.id,
         street: `Street ${j} for ${customer.firstName}`,
         city: `City ${j}`
+      });
+      addresses.push(address);
+
+      // Create 1 delivery for each address
+      deliveries.push(createMockDelivery({
+        customerId: customer.id,
+        addressId: address.id,
+        packageIds: [] // Will populate below
       }));
     }
 
     // Create 5 packages for this customer
     for (let k = 1; k <= 5; k++) {
-      packages.push(createMockPackage({
+      const pkg = createMockPackage({
         customerId: customer.id,
         name: `Package ${k} for ${customer.firstName}`,
         description: `Description for package ${k} of customer ${customer.firstName}`
-      }));
+      });
+      packages.push(pkg);
+
+      // Assign package to a random delivery for this customer (simplification)
+      // In a real scenario, we'd match address, but here we just pick one of the 5 deliveries we just made
+      const deliveryIndex = (i - 1) * 5 + (k % 5);
+      if (deliveries[deliveryIndex]) {
+        deliveries[deliveryIndex].packageIds.push(pkg.id);
+      }
     }
   }
 
-  return { customers, addresses, packages };
+  return { customers, addresses, packages, deliveries };
 }
