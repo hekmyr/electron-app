@@ -7,4 +7,6 @@ export interface CustomerDAO {
   birthdate: Date;
   createdAt: Date;
   updatedAt: Date;
+  billingAddressId?: string;
+  deliveryAddressId?: string;
 }

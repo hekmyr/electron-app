@@ -32,7 +32,9 @@ export default class CustomerIpc implements Registrable {
         lastName: result.lastName,
         birthdate: result.birthdate,
         createdAt: result.createdAt,
-        updatedAt: result.updatedAt
+        updatedAt: result.updatedAt,
+        billingAddressId: result.billingAddressId,
+        deliveryAddressId: result.deliveryAddressId,
       } satisfies CustomerDTO;
     });
 
@@ -46,7 +48,9 @@ export default class CustomerIpc implements Registrable {
         lastName: result.lastName,
         birthdate: result.birthdate,
         createdAt: result.createdAt,
-        updatedAt: result.updatedAt
+        updatedAt: result.updatedAt,
+        billingAddressId: result.billingAddressId,
+        deliveryAddressId: result.deliveryAddressId,
       }));
       return customers;
     });
@@ -56,7 +60,7 @@ export default class CustomerIpc implements Registrable {
     });
 
     ipcMain.handle('customer:updateById', async (_event, id: string, customer: CustomerDTO): Promise<void> => {
-      await this._customerRepositoryImpl.updateById(id, customer);
+      return await this._customerRepositoryImpl.updateById(id, customer);
     });
   }
 }

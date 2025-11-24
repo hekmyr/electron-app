@@ -51,6 +51,8 @@ export class CustomerRepositoryImpl implements CustomerRepository {
         firstName: customer.firstName,
         lastName: customer.lastName,
         birthdate: customer.birthdate,
+        billingAddressId: customer.billingAddressId,
+        deliveryAddressId: customer.deliveryAddressId,
       }
     });
   }
