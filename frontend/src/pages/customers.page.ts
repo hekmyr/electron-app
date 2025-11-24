@@ -1,5 +1,6 @@
 import { ContextService } from "@/shared/services/context";
 import { DataService, DataServiceImpl } from "@/shared/services/data";
+import { AgePipe } from "@/shared/pipes/age.pipe";
 import { Component, ElementRef, inject, OnInit, signal, viewChild } from "@angular/core";
 import { BreadcrumbItem, QuickAction } from "@libs/app/header.component";
 import { ResourceAction, ResourceTableComponent } from "@libs/app/resource-table/src";
@@ -27,7 +28,8 @@ import type { ColumnDef } from "@tanstack/angular-table";
     CustomerManageAddressesComponent,
     HlmAlertDialogImports,
     BrnAlertDialogImports,
-    HlmButton
+    HlmButton,
+    AgePipe
   ],
   template: `
     <app-shell
@@ -185,7 +187,10 @@ export class CustomersPage implements OnInit {
       id: 'birthdate',
       header: 'Age',
       enableSorting: false,
-      cell: (info) => `${info.getValue()}`,
+      cell: (info) => {
+        const agePipe = new AgePipe();
+        return agePipe.transform(info.getValue() as Date);
+      },
     },
     {
       accessorKey: 'createdAt',
@@ -217,8 +222,8 @@ export class CustomersPage implements OnInit {
   protected openManageAddresses(customer: CustomerDTO) {
     this._selectedCustomerSignal.set(customer);
     setTimeout(() => {
-        const ref = this._manageAddressesRef();
-        ref?.open();
+      const ref = this._manageAddressesRef();
+      ref?.open();
     });
   }
 
