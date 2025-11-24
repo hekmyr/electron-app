@@ -1,26 +1,54 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { HlmBreadCrumbImports } from '@spartan-ng/helm/breadcrumb';
+import { HlmSidebarImports } from '@spartan-ng/helm/sidebar';
+import { SidebarComponent, SidebarGroup } from '@libs/app/sidebar.component';
+import { ContextService } from '@/shared/services/context';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet],
+  imports: [
+    RouterOutlet,
+    HlmBreadCrumbImports,
+    HlmSidebarImports,
+    SidebarComponent
+  ],
   template: `
-    <h1>Welcome to {{ title() }}!</h1>
-
-    <p>{{ content() }}</p>
-
-    <router-outlet />
+    <app-sidebar
+      [title]="title"
+      [value]="sidebar"
+    >
+      <router-outlet />
+    </app-sidebar>
   `,
-  styles: [],
 })
 export class App {
-  protected readonly title = signal('Logix');
 
-  protected readonly content = signal(
-    (() => {
-      const v = window.electron.version;
-      return `This app is using Chrome (v${v.chrome}), Node.js (v${v.node}), and Electron (v${v.electron})`;
-    })()
-  );
+  private _contextService = inject(ContextService);
+  protected readonly title = 'Logix';
+
+  protected readonly sidebar: SidebarGroup[] = [
+    {
+      label: 'Main',
+      items: [
+        { label: 'Dashboard', url: '/' },
+      ]
+    },
+    {
+      label: 'Management',
+      items: [
+        { label: 'Customers', url: '/customers' },
+        { label: 'Packages', url: '/packages' },
+        { label: 'Deliveries', url: '/deliveries' },
+        { label: 'Returns', url: '/returns' },
+      ]
+    }
+  ];
+
+  constructor() {
+    const electronService = window.electron;
+    if (electronService) {
+      this._contextService.electronService = electronService;
+    }
+  }
 }

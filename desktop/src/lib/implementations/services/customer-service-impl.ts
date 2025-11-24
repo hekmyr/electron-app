@@ -1,10 +1,10 @@
+import { CustomerDTO } from "@/shared/dto/customer-dto.interface";
 import { WithoutId } from "@/shared/helper";
 import { CustomerService } from "@/shared/services/customer-service.interface";
-import { Customer } from "@prisma/client";
 import { ipcRenderer } from "electron";
 
 export const customerServiceImpl: CustomerService = {
-  insert: async (customer: WithoutId<Customer>) => {
+  insert: async (customer: WithoutId<CustomerDTO>) => {
     return await ipcRenderer.invoke('customer:insert', customer);
   },
   deleteById: async (id: string) => {
@@ -13,7 +13,13 @@ export const customerServiceImpl: CustomerService = {
   findById: async (id: string) => {
     return await ipcRenderer.invoke('customer:findById', id);
   },
-  updateById: async (id: string, customer: Customer) => {
+  findDetailsById: async (id: string) => {
+    return await ipcRenderer.invoke('customer:findDetailsById', id);
+  },
+  updateById: async (id: string, customer: CustomerDTO) => {
     await ipcRenderer.invoke('customer:updateById', id, customer);
+  },
+  findbyPage: async (limit: number, page?: number) => {
+    return await ipcRenderer.invoke('customer:findbyPage', limit, page);
   }
 }

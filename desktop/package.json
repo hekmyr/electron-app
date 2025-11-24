@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "build": "tsc && npm run build:preload",
+    "build": "npm run build:main && npm run build:preload",
+    "build:main": "esbuild src/main.ts --bundle --platform=node --outfile=../dist/desktop/src/main.js --external:electron --external:@prisma/client --tsconfig=tsconfig.json",
     "build:preload": "esbuild src/preload.ts --bundle --platform=node --outfile=../dist/desktop/src/preload.js --external:electron --external:@prisma/client --tsconfig=tsconfig.json",
     "start": "electron ../dist/desktop/src/main.js"
   },

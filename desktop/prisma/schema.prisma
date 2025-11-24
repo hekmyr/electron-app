@@ -14,27 +14,94 @@ datasource db {
 }
 
 model Customer {
-  @@map("customers")
 
-  id        String    @id @default(uuid()) @db.Char(36)
-  email     String    @unique
+  id        String   @id @default(uuid()) @db.Char(36)
+  email     String   @unique
+  phone     String
   firstName String
   lastName  String
   birthdate DateTime
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  packages  Package[]
+  billingAddressId  String? @db.Char(36)
+  deliveryAddressId String? @db.Char(36)
+
+  packages Package[]
+  addresses Address[]
+  deliveries Delivery[]
+
+  @@map("customers")
 }
 
 model Package {
-  @@map("packages")
 
-  id          String    @id @default(uuid()) @db.Char(36)
-  name        String
-  description String
-  Customer    Customer  @relation(fields: [customerId], references: [id])
-  customerId  String    @db.Char(36)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id               String    @id @default(uuid()) @db.Char(36)
+  name             String
+  description      String
+  status           String
+  receivedAt       DateTime?
+  deliveredAt      DateTime?
+  outForDeliveryAt DateTime?
+  Customer         Customer  @relation(fields: [customerId], references: [id])
+  customerId       String    @db.Char(36)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  Delivery   Delivery? @relation(fields: [deliveryId], references: [id])
+  deliveryId String?   @db.Char(36)
+
+  returns Return[]
+
+  @@map("packages")
 }
+
+model Address {
+  id          String   @id @default(uuid()) @db.Char(36)
+  street      String
+  houseNumber String
+  boxNumber   String?
+  postalCode  String
+  city        String
+  countryCode String
+  customerId  String   @db.Char(36)
+  Customer    Customer @relation(fields: [customerId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  Delivery Delivery[]
+
+  @@map("addresses")
+}
+
+model Delivery {
+  id          String   @id @default(uuid()) @db.Char(36)
+  status      String
+  scheduledAt DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  Customer   Customer @relation(fields: [customerId], references: [id])
+  customerId String   @db.Char(36)
+
+  Address   Address @relation(fields: [addressId], references: [id])
+  addressId String  @db.Char(36)
+
+  packages Package[]
+
+  @@map("deliveries")
+}
+
+model Return {
+  id        String   @id @default(uuid()) @db.Char(36)
+  status    String
+  reason    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Package   Package @relation(fields: [packageId], references: [id])
+  packageId String  @db.Char(36)
+
+  @@map("returns")
+}
+
