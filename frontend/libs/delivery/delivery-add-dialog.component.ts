@@ -1,7 +1,8 @@
-import { Component, ElementRef, output, viewChild } from "@angular/core";
+import { Component, ElementRef, input, output, viewChild } from "@angular/core";
 import { HlmAlertDialogImports } from "@libs/ui/alert-dialog/src";
 import { HlmButton } from "@libs/ui/button/src";
 import { DeliveryDTO } from "@shared/dto/delivery-dto.interface";
+import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
 import { DeliveryFormComponent } from "./delivery-form.component";
 
@@ -31,6 +32,7 @@ import { DeliveryFormComponent } from "./delivery-form.component";
 
         <delivery-form
           #formComponent
+          [customers]="customers()"
           (save)="handleSave($event, ctx)"
         />
 
@@ -57,6 +59,7 @@ import { DeliveryFormComponent } from "./delivery-form.component";
 export class DeliveryAddDialogComponent {
     protected readonly triggerRefSignal = viewChild.required<ElementRef<HTMLButtonElement>>('triggerRef');
 
+    public readonly customers = input<CustomerDTO[]>([]);
     public readonly save = output<{ id: string; delivery: DeliveryDTO }>();
 
     public open() {

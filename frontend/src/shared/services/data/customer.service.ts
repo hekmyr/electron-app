@@ -1,8 +1,10 @@
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
+import { CustomerDetailsDTO } from "@shared/dto/customer-details.dto";
 import * as SharedServices from '@shared/services';
 
 export interface CustomerService {
   findCustomers(limit: number): Promise<Map<string, CustomerDTO>>;
+  findDetailsById(id: string): Promise<CustomerDetailsDTO | null>;
   updateCustomer(id: string, customer: CustomerDTO): Promise<void>;
   createCustomer(customer: CustomerDTO): Promise<void>;
   deleteCustomer(id: string): Promise<void>;
@@ -19,6 +21,10 @@ export class CustomerServiceImpl implements CustomerService {
     const map = new Map<string, CustomerDTO>();
     customers.forEach(customer => map.set(customer.id, customer));
     return map;
+  }
+
+  public async findDetailsById(id: string): Promise<CustomerDetailsDTO | null> {
+    return await this._customerService.findDetailsById(id);
   }
 
   public async updateCustomer(id: string, customer: CustomerDTO) {

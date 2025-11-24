@@ -1,7 +1,7 @@
-import { WithoutId } from "@/shared/helper";
-import { CustomerRepository } from "../../interfaces/repositories/customer-repository.interface";
-import { PrismaClient } from "@prisma/client";
 import { CustomerDTO } from "@/shared/dto/customer-dto.interface";
+import { WithoutId } from "@/shared/helper";
+import { PrismaClient } from "@prisma/client";
+import { CustomerRepository } from "../../interfaces/repositories/customer-repository.interface";
 
 export class CustomerRepositoryImpl implements CustomerRepository {
 
@@ -25,6 +25,23 @@ export class CustomerRepositoryImpl implements CustomerRepository {
   async findById(id: string) {
     return this._client.customer.findUnique({
       where: { id }
+    });
+  }
+
+  async findDetailsById(id: string) {
+    return this._client.customer.findUnique({
+      where: { id },
+      include: {
+        packages: true,
+        addresses: true,
+        deliveries: {
+          include: {
+            packages: {
+                select: { id: true }
+            }
+          }
+        }
+      }
     });
   }
 

@@ -1,6 +1,6 @@
+import { CustomerDTO } from "@/shared/dto/customer-dto.interface";
 import { WithoutId } from "@/shared/helper";
 import { CustomerService } from "@/shared/services/customer-service.interface";
-import { CustomerDTO } from "@/shared/dto/customer-dto.interface";
 import { ipcRenderer } from "electron";
 
 export const customerServiceImpl: CustomerService = {
@@ -12,6 +12,9 @@ export const customerServiceImpl: CustomerService = {
   },
   findById: async (id: string) => {
     return await ipcRenderer.invoke('customer:findById', id);
+  },
+  findDetailsById: async (id: string) => {
+    return await ipcRenderer.invoke('customer:findDetailsById', id);
   },
   updateById: async (id: string, customer: CustomerDTO) => {
     await ipcRenderer.invoke('customer:updateById', id, customer);

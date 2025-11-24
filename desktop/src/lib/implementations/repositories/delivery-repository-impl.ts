@@ -1,8 +1,7 @@
 import { DeliveryDTO } from "@/shared/dto/delivery-dto.interface";
 import { WithoutId } from "@/shared/helper";
-import { DeliveryRepository } from "../../interfaces/repositories/delivery-repository.interface";
 import { PrismaClient } from "@prisma/client";
-import { DeliveryDAO } from "../../interfaces/dao/delivery-dao.interface";
+import { DeliveryRepository, DeliveryWithPackages } from "../../interfaces/repositories/delivery-repository.interface";
 
 export class DeliveryRepositoryImpl implements DeliveryRepository {
 
@@ -17,23 +16,36 @@ export class DeliveryRepositoryImpl implements DeliveryRepository {
         scheduledAt: delivery.scheduledAt,
         customerId: delivery.customerId,
         addressId: delivery.addressId,
+        packages: {
+          connect: delivery.packageIds.map(id => ({ id }))
+        }
       }
     });
     return result.id;
   }
 
-  async findById(id: string): Promise<DeliveryDAO | null> {
+  async findById(id: string): Promise<DeliveryWithPackages | null> {
     return this._client.delivery.findUnique({
       where: { id },
-    });
+      include: {
+        packages: {
+          select: { id: true }
+        }
+      }
+    }) as Promise<DeliveryWithPackages | null>;
   }
 
-  async findbyPage(limit: number, page: number = 0): Promise<DeliveryDAO[]> {
+  async findbyPage(limit: number, page: number = 0): Promise<DeliveryWithPackages[]> {
     const skip = page * limit;
     return this._client.delivery.findMany({
       take: limit,
       skip,
-    });
+      include: {
+        packages: {
+          select: { id: true }
+        }
+      }
+    }) as Promise<DeliveryWithPackages[]>;
   }
 
   async deleteById(id: string): Promise<void> {
@@ -50,6 +62,9 @@ export class DeliveryRepositoryImpl implements DeliveryRepository {
         scheduledAt: delivery.scheduledAt,
         customerId: delivery.customerId,
         addressId: delivery.addressId,
+        packages: {
+            set: delivery.packageIds.map(id => ({ id }))
+        }
       }
     });
   }

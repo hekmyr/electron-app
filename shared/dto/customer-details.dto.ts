@@ -4,8 +4,8 @@ import { DeliveryDTO } from "./delivery-dto.interface";
 import { PackageDTO } from "./package-dto.interface";
 
 export interface CustomerDetailsDTO {
-    customer: CustomerDTO;
-    packages: PackageDTO[];
-    addresses: AddressDTO[];
-    deliveries: DeliveryDTO[];
+  customer: CustomerDTO;
+  packages: PackageDTO[];
+  addresses: AddressDTO[];
+  deliveries: DeliveryDTO[];
 }

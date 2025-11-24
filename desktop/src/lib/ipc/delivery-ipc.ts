@@ -35,6 +35,7 @@ export default class DeliveryIpc implements Registrable {
         updatedAt: result.updatedAt,
         customerId: result.customerId,
         addressId: result.addressId,
+        packageIds: result.packages.map(p => p.id),
       } satisfies DeliveryDTO;
     });
 
@@ -48,6 +49,7 @@ export default class DeliveryIpc implements Registrable {
         updatedAt: result.updatedAt,
         customerId: result.customerId,
         addressId: result.addressId,
+        packageIds: result.packages.map(p => p.id)
       }));
     });
 

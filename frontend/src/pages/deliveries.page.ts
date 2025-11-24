@@ -14,6 +14,7 @@ import { HlmButton } from "@libs/ui/button/src";
 import { provideIcons } from "@ng-icons/core";
 import { lucidePenLine, lucidePlus, lucideTrash2 } from "@ng-icons/lucide";
 import { DeliveryDTO } from "@shared/dto/delivery-dto.interface";
+import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
 import { ColumnDef } from "@tanstack/angular-table";
 
@@ -50,6 +51,7 @@ import { ColumnDef } from "@tanstack/angular-table";
 
       <delivery-add-dialog
         #addDialogRef
+        [customers]="_customers()"
         (save)="handleCreate($event)"
       />
 
@@ -64,6 +66,7 @@ import { ColumnDef } from "@tanstack/angular-table";
           <delivery-form
             #editForm
             [delivery]="selectedDelivery"
+            [customers]="_customers()"
             (save)="handleEditSave($event, ctx)"
           />
           <hlm-alert-dialog-footer>
@@ -104,6 +107,7 @@ export class DeliveriesPage implements OnInit {
 
   private _deliveriesMap: Map<string, DeliveryDTO> = new Map();
   protected readonly _deliveries = signal<DeliveryDTO[]>([]);
+  protected readonly _customers = signal<CustomerDTO[]>([]);
 
   protected readonly _addDialogRefSignal = viewChild.required<DeliveryAddDialogComponent>('addDialogRef');
   protected readonly _editTriggerRefSignal = viewChild.required<ElementRef<HTMLButtonElement>>('editTriggerRef');
@@ -199,6 +203,9 @@ export class DeliveriesPage implements OnInit {
   public async ngOnInit() {
     this._deliveriesMap = await this._dataService.deliveries.findDeliveries(50);
     this._deliveries.set(Array.from(this._deliveriesMap.values()));
+
+    const customersMap = await this._dataService.customers.findCustomers(100);
+    this._customers.set(Array.from(customersMap.values()));
   }
 
   protected handleCreate(event: { id: string; delivery: DeliveryDTO }) {
