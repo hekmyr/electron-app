@@ -35,7 +35,8 @@ export class App {
       label: 'Manage',
       items: [
         { label: 'Customers', url: '/customers' },
-        { label: 'Packages', url: '/packages' }
+        { label: 'Packages', url: '/packages' },
+        { label: 'Deliveries', url: '/deliveries' }
       ]
     }
   ];
