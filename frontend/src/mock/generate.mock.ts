@@ -1,3 +1,4 @@
+import { AddressDTO } from "@shared/dto/address-dto.interface";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 import { PackageDTO } from "@shared/dto/package-dto.interface";
 
@@ -32,6 +33,27 @@ export function createMockCustomers(count: number = 3) {
 }
 
 /**
+ * Create a mock AddressDTO
+ * @param overrides - Partial fields to override on the generated mock
+ */
+export function createMockAddress(overrides?: Partial<AddressDTO>) {
+  const now = new Date();
+  const defaults: AddressDTO = {
+    id: `${Date.now()}-${Math.floor(Math.random() * 1000000)}`,
+    street: `Main Street ${Math.floor(Math.random() * 100)}`,
+    houseNumber: `${Math.floor(Math.random() * 100)}`,
+    boxNumber: `${Math.floor(Math.random() * 10)}`,
+    postalCode: `${Math.floor(1000 + Math.random() * 9000)}`,
+    city: 'New York',
+    countryCode: 'US',
+    customerId: `${Math.floor(Math.random() * 10000)}`,
+    createdAt: now,
+    updatedAt: now,
+  };
+  return { ...defaults, ...overrides };
+}
+
+/**
  * Create a mock PackageDTO
  * @param overrides - Partial fields to override on the generated mock
  */
@@ -63,4 +85,38 @@ export function createMockPackages(count: number = 3) {
     });
 
     return out;
+}
+
+export function generateMocks(customerLimit: number) {
+  const customers: CustomerDTO[] = [];
+  const addresses: AddressDTO[] = [];
+  const packages: PackageDTO[] = [];
+
+  for (let i = 1; i <= customerLimit; i++) {
+    const customer = createMockCustomer({
+      firstName: `Test ${i}`,
+      lastName: `User ${i}`,
+    });
+    customers.push(customer);
+
+    // Create 5 addresses for this customer
+    for (let j = 1; j <= 5; j++) {
+      addresses.push(createMockAddress({
+        customerId: customer.id,
+        street: `Street ${j} for ${customer.firstName}`,
+        city: `City ${j}`
+      }));
+    }
+
+    // Create 5 packages for this customer
+    for (let k = 1; k <= 5; k++) {
+      packages.push(createMockPackage({
+        customerId: customer.id,
+        name: `Package ${k} for ${customer.firstName}`,
+        description: `Description for package ${k} of customer ${customer.firstName}`
+      }));
+    }
+  }
+
+  return { customers, addresses, packages };
 }
