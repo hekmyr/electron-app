@@ -60,6 +60,12 @@
       ],
       "@spartan-ng/helm/menu": [
         "./libs/ui/menu/src/index.ts"
+      ],
+      "@spartan-ng/helm/popover": [
+        "./libs/ui/popover/src/index.ts"
+      ],
+      "@spartan-ng/helm/command": [
+        "./libs/ui/command/src/index.ts"
       ]
     }
   },
