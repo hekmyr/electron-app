@@ -24,6 +24,9 @@ model Customer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  billingAddressId  String? @db.Char(36)
+  deliveryAddressId String? @db.Char(36)
+
   packages Package[]
   addresses Address[]
 
