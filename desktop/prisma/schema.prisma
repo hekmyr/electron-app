@@ -29,6 +29,7 @@ model Customer {
 
   packages Package[]
   addresses Address[]
+  deliveries Delivery[]
 
   @@map("customers")
 }
@@ -47,6 +48,9 @@ model Package {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
+  Delivery   Delivery? @relation(fields: [deliveryId], references: [id])
+  deliveryId String?   @db.Char(36)
+
   @@map("packages")
 }
 
@@ -64,4 +68,22 @@ model Address {
   updatedAt   DateTime @updatedAt
 
   @@map("addresses")
+}
+
+model Delivery {
+  id          String   @id @default(uuid()) @db.Char(36)
+  status      String
+  scheduledAt DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  Customer   Customer @relation(fields: [customerId], references: [id])
+  customerId String   @db.Char(36)
+
+  Address   Address @relation(fields: [addressId], references: [id])
+  addressId String  @db.Char(36)
+
+  packages Package[]
+
+  @@map("deliveries")
 }
