@@ -6,7 +6,11 @@ import { createMockCustomer, createMockCustomers } from "../../generate.mock";
 
 export class MockCustomerService implements CustomerService {
 
-  private _customersSignal = signal<CustomerDTO[]>(createMockCustomers(500));
+  private _customersSignal = signal<CustomerDTO[]>([]);
+
+  constructor(initialCustomers: CustomerDTO[] = []) {
+    this._customersSignal.set(initialCustomers);
+  }
 
   findById(id: string): Promise<CustomerDTO> {
     return Promise.resolve(createMockCustomer({ id }));

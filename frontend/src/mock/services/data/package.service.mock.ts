@@ -6,7 +6,11 @@ import { PackageService } from "@shared/services/package-service.interface";
 
 export class MockPackageService implements PackageService {
 
-  private readonly _packagesSignal = signal<PackageDTO[]>(createMockPackages(500));
+  private readonly _packagesSignal = signal<PackageDTO[]>([]);
+
+  constructor(initialPackages: PackageDTO[] = []) {
+    this._packagesSignal.set(initialPackages);
+  }
 
   findById(id: string) {
     return Promise.resolve(createMockPackage({ id }));
