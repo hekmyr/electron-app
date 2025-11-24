@@ -7,10 +7,11 @@ import { ShellComponent } from "@libs/app/shell.component";
 import { CustomerAddDialogComponent } from "@libs/customer/customer-add-dialog.component";
 import { CustomerDeleteConfirmComponent } from "@libs/customer/customer-delete-confirm.component";
 import { CustomerFormComponent } from "@libs/customer/customer-form.component";
+import { CustomerManageAddressesComponent } from "@libs/customer/customer-manage-addresses.component";
 import { HlmAlertDialogImports } from "@libs/ui/alert-dialog/src";
 import { HlmButton } from "@libs/ui/button/src";
 import { provideIcons } from "@ng-icons/core";
-import { lucidePenLine, lucidePlus, lucideTrash2 } from "@ng-icons/lucide";
+import { lucideHouse, lucidePenLine, lucidePlus, lucideTrash2 } from "@ng-icons/lucide";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
 import type { ColumnDef } from "@tanstack/angular-table";
@@ -23,6 +24,7 @@ import type { ColumnDef } from "@tanstack/angular-table";
     CustomerAddDialogComponent,
     CustomerFormComponent,
     CustomerDeleteConfirmComponent,
+    CustomerManageAddressesComponent,
     HlmAlertDialogImports,
     BrnAlertDialogImports,
     HlmButton
@@ -43,6 +45,14 @@ import type { ColumnDef } from "@tanstack/angular-table";
       />
 
       @let selectedCustomer = _selectedCustomerSignal();
+
+      @if(selectedCustomer) {
+        <customer-manage-addresses
+          #manageAddressesRef
+          [customer]="selectedCustomer"
+        />
+      }
+
       <!-- Edit Dialog -->
       <hlm-alert-dialog>
         <button #editTriggerRef class="hidden" brnAlertDialogTrigger></button>
@@ -90,7 +100,8 @@ import type { ColumnDef } from "@tanstack/angular-table";
     provideIcons({
       lucidePenLine,
       lucidePlus,
-      lucideTrash2
+      lucideTrash2,
+      lucideHouse
     })
   ]
 })
@@ -102,6 +113,7 @@ export class CustomersPage implements OnInit {
   protected readonly _addDialogRefSignal = viewChild.required<CustomerAddDialogComponent>('addDialogRef');
   protected readonly _editTriggerRefSignal = viewChild.required<ElementRef<HTMLButtonElement>>('editTriggerRef');
   protected readonly _deleteTriggerRef = viewChild.required<ElementRef<HTMLButtonElement>>('deleteTriggerRef');
+  protected readonly _manageAddressesRef = viewChild<CustomerManageAddressesComponent>('manageAddressesRef');
 
   protected readonly _selectedCustomerSignal = signal<CustomerDTO | undefined>(undefined);
 
@@ -120,6 +132,11 @@ export class CustomersPage implements OnInit {
       label: 'Edit',
       icon: 'lucidePenLine',
       onClick: (customer) => this.openEdit(customer)
+    },
+    {
+      label: 'Manage addresses',
+      icon: 'lucideHouse',
+      onClick: (customer) => this.openManageAddresses(customer)
     },
     {
       label: 'Delete',
@@ -195,6 +212,14 @@ export class CustomersPage implements OnInit {
     this._customers.set(Array.from(this._customersMap.values()));
 
     this._dataService.customers.createCustomer(event.customer);
+  }
+
+  protected openManageAddresses(customer: CustomerDTO) {
+    this._selectedCustomerSignal.set(customer);
+    setTimeout(() => {
+        const ref = this._manageAddressesRef();
+        ref?.open();
+    });
   }
 
   protected openEdit(customer: CustomerDTO) {
