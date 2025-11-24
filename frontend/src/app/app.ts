@@ -29,14 +29,18 @@ export class App {
 
   protected readonly sidebar: SidebarGroup[] = [
     {
-      items: [{ label: 'Dashboard', url: '/' }]
+      label: 'Main',
+      items: [
+        { label: 'Dashboard', url: '/' },
+      ]
     },
     {
-      label: 'Manage',
+      label: 'Management',
       items: [
         { label: 'Customers', url: '/customers' },
         { label: 'Packages', url: '/packages' },
-        { label: 'Deliveries', url: '/deliveries' }
+        { label: 'Deliveries', url: '/deliveries' },
+        { label: 'Returns', url: '/returns' },
       ]
     }
   ];

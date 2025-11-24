@@ -2,6 +2,7 @@ import { AddressDTO } from "@shared/dto/address-dto.interface";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 import { PackageDTO } from "@shared/dto/package-dto.interface";
 import { DeliveryDTO } from "@shared/dto/delivery-dto.interface";
+import { ReturnDTO } from "@shared/dto/return-dto.interface";
 
 /**
  * Create a mock CustomerDTO
@@ -117,11 +118,44 @@ export function createMockDeliveries(count: number = 3) {
   return out;
 }
 
+/**
+ * Create a mock ReturnDTO
+ * @param overrides - Partial fields to override on the generated mock
+ */
+export function createMockReturn(overrides?: Partial<ReturnDTO>) {
+  const statuses = ['pending', 'approved', 'rejected', 'completed'] as const;
+  const reasons = [
+    'Damaged during shipping',
+    'Wrong item received',
+    'Item not as described',
+    'No longer needed',
+    'Defective product'
+  ];
+  const defaults: ReturnDTO = {
+    id: `${Date.now()}-${Math.floor(Math.random() * 1000000)}`,
+    packageId: `${Math.floor(Math.random() * 10000)}`,
+    status: statuses[Math.floor(Math.random() * statuses.length)],
+    reason: reasons[Math.floor(Math.random() * reasons.length)],
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+  return { ...defaults, ...overrides };
+}
+
+export function createMockReturns(count: number = 3) {
+  const out: ReturnDTO[] = [];
+  for (let i = 1; i <= count; i++) {
+    out.push(createMockReturn());
+  }
+  return out;
+}
+
 export function generateMocks(customerLimit: number) {
   const customers: CustomerDTO[] = [];
   const addresses: AddressDTO[] = [];
   const packages: PackageDTO[] = [];
   const deliveries: DeliveryDTO[] = [];
+  const returns: ReturnDTO[] = [];
 
   for (let i = 1; i <= customerLimit; i++) {
     const customer = createMockCustomer({
@@ -162,8 +196,16 @@ export function generateMocks(customerLimit: number) {
       if (deliveries[deliveryIndex]) {
         deliveries[deliveryIndex].packageIds.push(pkg.id);
       }
+
+      // Create a return for some packages (30% chance)
+      if (Math.random() < 0.3) {
+        returns.push(createMockReturn({
+          packageId: pkg.id
+        }));
+      }
     }
   }
 
-  return { customers, addresses, packages, deliveries };
+  return { customers, addresses, packages, deliveries, returns };
 }
+

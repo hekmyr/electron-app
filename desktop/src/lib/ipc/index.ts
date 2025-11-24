@@ -1,20 +1,20 @@
 import { PrismaClient } from "@prisma/client";
-import PackageIpc from "./package-ipc";
-import CustomerIpc from "./customer-ipc";
 import AddressIpc from "./address-ipc";
+import CustomerIpc from "./customer-ipc";
 import DeliveryIpc from "./delivery-ipc";
-import Registrable from "../interfaces/registrable.interface";
+import PackageIpc from "./package-ipc";
+import ReturnIpc from "./return-ipc";
 
 export function registerIpcs(client: PrismaClient) {
+  const customerIpc = new CustomerIpc(client);
+  const addressIpc = new AddressIpc(client);
+  const packageIpc = new PackageIpc(client);
+  const deliveryIpc = new DeliveryIpc(client);
+  const returnIpc = new ReturnIpc(client);
 
-  const ipcs = [
-    new CustomerIpc(client),
-    new PackageIpc(client),
-    new AddressIpc(client),
-    new DeliveryIpc(client)
-  ] as Registrable[];
-
-  for (const ipc of ipcs) {
-    ipc.register();
-  }
+  customerIpc.register();
+  addressIpc.register();
+  packageIpc.register();
+  deliveryIpc.register();
+  returnIpc.register();
 }
