@@ -1,18 +1,19 @@
-import { Component, inject, input, signal, ViewChild, ElementRef, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { HlmAlertDialogImports } from "@libs/ui/alert-dialog/src";
-import { HlmButton } from "@libs/ui/button/src";
-import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
-import { CustomerDTO } from "@shared/dto/customer-dto.interface";
-import { AddressDTO } from "@shared/dto/address-dto.interface";
-import { AddressFormComponent } from './address-form.component';
 import { ContextService } from "@/shared/services/context";
 import { DataService, DataServiceImpl } from "@/shared/services/data";
-import { HlmTable, HlmTBody, HlmTd, HlmTh, HlmTHead, HlmTr } from "@libs/ui/table/src";
+import { CommonModule } from '@angular/common';
+import { Component, computed, ElementRef, inject, input, output, signal, ViewChild } from '@angular/core';
+import { HlmAlertDialogImports } from "@libs/ui/alert-dialog/src";
+import { HlmButton } from "@libs/ui/button/src";
 import { HlmMenuImports } from "@libs/ui/menu/src";
-import { BrnContextMenuImports } from '@spartan-ng/ui-menu-brain';
+import { HlmTable, HlmTBody, HlmTd, HlmTh, HlmTHead, HlmTr } from "@libs/ui/table/src";
 import { NgIcon, provideIcons } from "@ng-icons/core";
-import { lucideEllipsis, lucideCheck } from "@ng-icons/lucide";
+import { lucideCheck, lucideEllipsis } from "@ng-icons/lucide";
+import { AddressDTO } from "@shared/dto/address-dto.interface";
+import { CustomerDTO } from "@shared/dto/customer-dto.interface";
+import { CustomerUpdateEvent } from '@shared/types/customer';
+import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
+import { BrnContextMenuImports } from '@spartan-ng/ui-menu-brain';
+import { AddressFormComponent } from './address-form.component';
 
 @Component({
   selector: 'customer-manage-addresses',
@@ -131,6 +132,8 @@ import { lucideEllipsis, lucideCheck } from "@ng-icons/lucide";
 })
 export class CustomerManageAddressesComponent {
     @ViewChild('trigger') protected readonly trigger!: ElementRef<HTMLButtonElement>;
+    protected onCustomerUpdate = output<CustomerUpdateEvent>();
+
     public readonly customerSignal = input.required<CustomerDTO>({ alias: 'customer' });
 
     private _contextService = inject(ContextService);
@@ -184,6 +187,7 @@ export class CustomerManageAddressesComponent {
         const updatedCustomer = { ...customer, billingAddressId: addr.id };
         await this._dataService.customers.updateCustomer(customer.id, updatedCustomer);
         this._localCustomer.set(updatedCustomer);
+        this.onCustomerUpdate.emit({ id: updatedCustomer.id, customer: updatedCustomer });
       }
 
       async setDefaultDelivery(addr: AddressDTO) {
@@ -193,5 +197,6 @@ export class CustomerManageAddressesComponent {
         const updatedCustomer = { ...customer, deliveryAddressId: addr.id };
         await this._dataService.customers.updateCustomer(customer.id, updatedCustomer);
         this._localCustomer.set(updatedCustomer);
+        this.onCustomerUpdate.emit({ id: updatedCustomer.id, customer: updatedCustomer });
       }
     }

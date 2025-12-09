@@ -1,7 +1,7 @@
-import { ContextService } from "@/shared/services/context";
-import { DataService, DataServiceImpl } from "@/shared/services/data";
 import { AgePipe } from "@/shared/pipes/age.pipe";
 import { DateFormatPipe } from "@/shared/pipes/date-format.pipe";
+import { ContextService } from "@/shared/services/context";
+import { DataService, DataServiceImpl } from "@/shared/services/data";
 import { Component, ElementRef, inject, OnInit, signal, viewChild } from "@angular/core";
 import { BreadcrumbItem, QuickAction } from "@libs/app/header.component";
 import { ResourceAction, ResourceTableComponent } from "@libs/app/resource-table/src";
@@ -15,6 +15,7 @@ import { HlmButton } from "@libs/ui/button/src";
 import { provideIcons } from "@ng-icons/core";
 import { lucideHouse, lucidePenLine, lucidePlus, lucideTrash2 } from "@ng-icons/lucide";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
+import { CustomerUpdateEvent } from "@shared/types/customer";
 import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
 import type { ColumnDef } from "@tanstack/angular-table";
 
@@ -54,6 +55,7 @@ import type { ColumnDef } from "@tanstack/angular-table";
         <customer-manage-addresses
           #manageAddressesRef
           [customer]="selectedCustomer"
+          (onCustomerUpdate)="handleCustomerUpdate($event)"
         />
       }
 
@@ -140,7 +142,7 @@ export class CustomersPage implements OnInit {
     {
       label: 'Manage addresses',
       icon: 'lucideHouse',
-      onClick: (customer) => this.openManageAddresses(customer)
+      onClick: (customer) => this.openManageAddresses(customer.id)
     },
     {
       label: 'Delete',
@@ -224,7 +226,18 @@ export class CustomersPage implements OnInit {
     this._dataService.customers.createCustomer(event.customer);
   }
 
-  protected openManageAddresses(customer: CustomerDTO) {
+  protected handleCustomerUpdate(event: CustomerUpdateEvent) {
+    this._customersMap.set(event.id, event.customer);
+    this._customers.set(Array.from(this._customersMap.values()));
+    this._selectedCustomerSignal.set(event.customer);
+  }
+
+  protected openManageAddresses(customerId: string) {
+    const customer = this._customersMap.get(customerId);
+    if (!customer) {
+      console.error('Customer not found for ID:', customerId);
+      return;
+    }
     this._selectedCustomerSignal.set(customer);
     setTimeout(() => {
       const ref = this._manageAddressesRef();
