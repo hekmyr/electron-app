@@ -174,7 +174,6 @@ export class PackagesPage implements OnInit {
     {
       label: 'Delete',
       icon: 'lucideTrash2',
-      variant: 'destructive',
       onClick: (pkg) => this.openDelete(pkg)
     }
   ];

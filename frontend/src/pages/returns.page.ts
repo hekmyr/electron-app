@@ -174,7 +174,6 @@ export class ReturnsPage implements OnInit {
         {
             label: 'Delete',
             icon: 'lucideTrash2',
-            variant: 'destructive',
             onClick: (returnData) => this.openDelete(returnData)
         }
     ];

@@ -147,7 +147,6 @@ export class CustomersPage implements OnInit {
     {
       label: 'Delete',
       icon: 'lucideTrash2',
-      variant: 'destructive',
       onClick: (customer) => this.openDelete(customer)
     }
   ];

@@ -194,7 +194,6 @@ export class DeliveriesPage implements OnInit {
     {
       label: 'Delete',
       icon: 'lucideTrash2',
-      variant: 'destructive',
       onClick: (delivery) => this.openDelete(delivery)
     }
   ];

@@ -1,15 +1,20 @@
 import { Component, input } from "@angular/core";
-import { HlmTable, HlmTableContainer, HlmTBody, HlmTd, HlmTh, HlmTHead, HlmTr } from "@libs/ui/table/src";
-import type { ColumnDef, Row } from '@tanstack/angular-table';
-import { createAngularTable, FlexRenderDirective, getCoreRowModel } from '@tanstack/angular-table';
-import { ResourceAction, ResourceActionsComponent } from "./resource-actions.component";
-import { BrnContextMenuImports } from '@spartan-ng/ui-menu-brain';
-import { HlmMenuImports } from '@libs/ui/menu/src';
 import { HlmIconImports } from '@libs/ui/icon/src';
+import { HlmMenuImports } from '@libs/ui/menu/src';
+import { HlmTable, HlmTableContainer, HlmTBody, HlmTd, HlmTh, HlmTHead, HlmTr } from "@libs/ui/table/src";
 import { NgIcon, provideIcons } from "@ng-icons/core";
 import { lucideGitBranch, lucidePenLine, lucideTrash2 } from "@ng-icons/lucide";
+import { BrnContextMenuImports } from '@spartan-ng/ui-menu-brain';
+import type { ColumnDef } from '@tanstack/angular-table';
+import { createAngularTable, FlexRenderDirective, getCoreRowModel } from '@tanstack/angular-table';
 
 export type ResourceColumnDef<T> = ColumnDef<T, any>;
+
+export interface ResourceAction<T> {
+  label: string;
+  icon: string;
+  onClick: (row: T) => void;
+}
 
 @Component({
   selector: 'resource-table',
@@ -22,7 +27,6 @@ export type ResourceColumnDef<T> = ColumnDef<T, any>;
     HlmTr,
     HlmTh,
     HlmTd,
-    ResourceActionsComponent,
     BrnContextMenuImports,
     HlmMenuImports,
     HlmIconImports,
@@ -68,16 +72,7 @@ export type ResourceColumnDef<T> = ColumnDef<T, any>;
 		          @let cells = row.getVisibleCells();
 		          @for (cell of cells; track cell.id) {
 		            <td hlmTd
-		                class="relative"
-		                (mouseenter)="setHoveredDetails(row)">
-		              @if (isRowActionColumn(cell.column.columnDef.meta)) {
-		                @if (isLineHovered(row)) {
-		                  <resource-actions
-		                    [actions]="actions()"
-		                    [context]="row.original"
-		                  />
-		                }
-		              } @else {
+		                class="relative">
 		                <ng-container
 		                  *flexRender="
 		                    cell.column.columnDef.cell;
@@ -87,7 +82,6 @@ export type ResourceColumnDef<T> = ColumnDef<T, any>;
 		                >
 		                  {{ cellText }}
 		                </ng-container>
-		              }
 		            </td>
 		          }
 		        </tr>
@@ -116,27 +110,9 @@ export class ResourceTableComponent<T> {
   public readonly data = input.required<T[]>();
   public readonly actions = input<ResourceAction<T>[]>([]);
 
-  protected _hoveredDetails: Row<T> | null = null;
-
   protected readonly _table = createAngularTable<T>(() => ({
     data: this.data(),
     columns: this.columns(),
     getCoreRowModel: getCoreRowModel(),
   }));
-
-  setHoveredDetails(rowDetails: Row<T> | null) {
-    if (rowDetails === null) {
-      this._hoveredDetails = null;
-      return;
-    }
-    this._hoveredDetails = rowDetails;
-  }
-
-  isLineHovered(row: Row<T>) {
-    return this._hoveredDetails?.id === row.id;
-  }
-
-  isRowActionColumn(meta: any): boolean {
-    return meta?.kind === 'rowActions';
-  }
 }

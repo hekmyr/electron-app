@@ -3,13 +3,6 @@ import { HlmButton } from "@libs/ui/button/src";
 import { NgIcon, provideIcons } from "@ng-icons/core";
 import { lucidePenLine, lucideTrash2 } from "@ng-icons/lucide";
 
-export interface ResourceAction<T> {
-  label: string;
-  icon: string;
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-  onClick: (row: T) => void;
-}
-
 @Component({
   selector: 'resource-actions',
   standalone: true,
