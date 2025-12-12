@@ -17,9 +17,5 @@ export class DashboardPage {
     { label: "Dashboard", url: "/" }
   ];
 
-  protected readonly content = (() => {
-    if (!window.electron) return 'Electron service not found';
-    const v = window.electron.version;
-    return `This app is using Chrome (v${v.chrome}), Node.js (v${v.node}), and Electron (v${v.electron})`;
-  })()
+  protected readonly content = "Dashboard content";
 }
