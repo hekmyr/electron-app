@@ -1,13 +1,33 @@
-import { Component, OnInit, inject, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { HlmButtonImports } from '@libs/ui/button/src';
+import { HlmCommandImports } from '@libs/ui/command/src';
+import { HlmIconImports } from '@libs/ui/icon/src';
 import { HlmInput } from '@libs/ui/input/src';
-import { isReturnStatus, ReturnDTO } from '@shared/dto/return-dto.interface';
+import { HlmPopoverImports } from '@libs/ui/popover/src';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideCheck, lucideChevronsUpDown, lucideSearch } from '@ng-icons/lucide';
+import { ReturnDTO, ReturnStatus, isReturnStatus, returnStatus } from '@shared/dto/return-dto.interface';
+import { BrnCommandImports } from '@spartan-ng/brain/command';
+import { BrnPopoverImports } from '@spartan-ng/brain/popover';
 
 @Component({
   selector: 'return-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HlmInput],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    HlmInput,
+    BrnCommandImports,
+    HlmCommandImports,
+    NgIcon,
+    HlmIconImports,
+    HlmButtonImports,
+    BrnPopoverImports,
+    HlmPopoverImports,
+  ],
+  providers: [provideIcons({ lucideChevronsUpDown, lucideSearch, lucideCheck })],
   template: `
     <form
       class="grid gap-4"
@@ -24,12 +44,44 @@ import { isReturnStatus, ReturnDTO } from '@shared/dto/return-dto.interface';
 
         <label class="grid gap-2 text-sm">
           <span>Status</span>
-          <select hlmInput formControlName="status">
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-            <option value="completed">Completed</option>
-          </select>
+          @let statusComboboxState = _statusComboboxStateSignal();
+          @let selectedStatus = _selectedStatusSignal();
+          <brn-popover [state]="statusComboboxState" (stateChanged)="_statusComboboxStateSignal.set($event)" sideOffset="5">
+            <button
+              type="button"
+              class="w-full justify-between font-normal"
+              variant="outline"
+              brnPopoverTrigger
+              (click)="_statusComboboxStateSignal.set('open')"
+              hlmBtn
+            >
+              {{ selectedStatus ? _getStatusLabel(selectedStatus) : 'Select status...' }}
+              <ng-icon hlm size="sm" name="lucideChevronsUpDown" class="opacity-50" />
+            </button>
+            <hlm-command *brnPopoverContent="let ctx" hlmPopoverContent class="w-[200px] p-0">
+              <hlm-command-search>
+                <ng-icon hlm name="lucideSearch" />
+                <input placeholder="Search status..." hlm-command-search-input />
+              </hlm-command-search>
+              <div *brnCommandEmpty hlmCommandEmpty>No statuses found.</div>
+              <hlm-command-list>
+                <hlm-command-group>
+                  @for (status of _returnStatusOptions; track status) {
+                    <button type="button" hlm-command-item class="font-normal" [value]="status" (selected)="_selectStatus(status)">
+                      <span>{{ _getStatusLabel(status) }}</span>
+                      <ng-icon
+                        hlm
+                        class="ml-auto"
+                        [class.opacity-0]="selectedStatus !== status"
+                        name="lucideCheck"
+                        hlmCommandIcon
+                      />
+                    </button>
+                  }
+                </hlm-command-group>
+              </hlm-command-list>
+            </hlm-command>
+          </brn-popover>
         </label>
 
         <label class="grid gap-2 text-sm">
@@ -46,6 +98,29 @@ export class ReturnFormComponent implements OnInit {
 
   private readonly _formBuilder = inject(NonNullableFormBuilder);
 
+  protected readonly _statusComboboxStateSignal = signal<'closed' | 'open'>('closed');
+  protected readonly _selectedStatusSignal = signal<ReturnStatus | undefined>(undefined);
+
+  private readonly _statusMap: Record<ReturnStatus, string> = {
+    'pending': 'Pending',
+    'approved': 'Approved',
+    'rejected': 'Rejected',
+    'completed': 'Completed',
+  };
+
+  protected readonly _returnStatusOptions: ReturnStatus[] = [...returnStatus];
+
+  protected _getStatusLabel(status: ReturnStatus | undefined): string {
+    if (!status) return '';
+    return this._statusMap[status] || status;
+  }
+
+  protected _selectStatus(status: ReturnStatus) {
+    this._selectedStatusSignal.set(status);
+    this._statusComboboxStateSignal.set('closed');
+    this.form.patchValue({ status });
+  }
+
   protected readonly form = this._formBuilder.group({
     packageId: ['', [Validators.required]],
     status: ['pending', [Validators.required]],
@@ -55,6 +130,7 @@ export class ReturnFormComponent implements OnInit {
   public ngOnInit() {
     const returnData = this.returnSignal();
     if (returnData) {
+      this._selectedStatusSignal.set(returnData.status as ReturnStatus);
       this.form.patchValue({
         packageId: returnData.packageId,
         status: returnData.status,
