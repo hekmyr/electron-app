@@ -5,7 +5,7 @@ import { BreadcrumbItem, HeaderComponent, QuickAction } from "@libs/app/header.c
   selector: 'app-shell',
   imports: [HeaderComponent],
   template: `
-    <div class="p-2 w-full">
+    <div class="py-2 w-full">
       <app-header
         [value]="breadcrumbs()"
         [actions]="actions()"
