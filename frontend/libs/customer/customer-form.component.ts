@@ -2,12 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, input, output } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HlmInput } from '@libs/ui/input/src';
+import { HlmDatePicker } from '@libs/ui/date-picker/src';
 import { CustomerDTO } from '@shared/dto/customer-dto.interface';
+import { UtilService } from '@/shared/services/util.service';
 
 @Component({
   selector: 'customer-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HlmInput],
+  imports: [CommonModule, ReactiveFormsModule, HlmInput, HlmDatePicker],
   template: `
     <form
       class="grid gap-4"
@@ -30,7 +32,11 @@ import { CustomerDTO } from '@shared/dto/customer-dto.interface';
 
       <label class="grid gap-2 text-sm">
         <span>Birth date</span>
-        <input hlmInput type="date" formControlName="birthdate" />
+        <hlm-date-picker
+          formControlName="birthdate"
+          class="w-full"
+          [formatDate]="formatDate"
+        />
       </label>
 
       <h3 class="text-lg font-medium mt-4">Contact Information</h3>
@@ -59,19 +65,20 @@ export class CustomerFormComponent implements OnInit {
     lastName: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
     phone: ['', [Validators.required]],
-    birthdate: ['', [Validators.required]],
+    birthdate: [new Date(), [Validators.required]],
   });
+
+  protected readonly formatDate = UtilService.formatLongDate;
 
   public ngOnInit() {
     const customer = this.customerSignal();
     if (customer) {
-      const birthdate = customer.birthdate.toISOString().split('T')[0];
       this.form.patchValue({
         firstName: customer.firstName,
         lastName: customer.lastName,
         email: customer.email,
         phone: customer.phone,
-        birthdate
+        birthdate: customer.birthdate
       });
     }
   }
