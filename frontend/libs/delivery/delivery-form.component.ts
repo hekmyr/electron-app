@@ -4,10 +4,12 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, input, OnInit, output, signal } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { HlmInput } from "@libs/ui/input/src";
+import { HlmDatePicker } from "@libs/ui/date-picker/src";
 import { AddressDTO } from "@shared/dto/address-dto.interface";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 import { DeliveryDTO } from "@shared/dto/delivery-dto.interface";
 import { PackageDTO } from "@shared/dto/package-dto.interface";
+import { UtilService } from "@/shared/services/util.service";
 
 // Spartan UI Imports
 import { HlmButtonImports } from '@libs/ui/button/src';
@@ -26,6 +28,7 @@ import { BrnPopoverImports } from '@spartan-ng/brain/popover';
     CommonModule,
     ReactiveFormsModule,
     HlmInput,
+    HlmDatePicker,
     BrnCommandImports,
     HlmCommandImports,
     NgIcon,
@@ -102,13 +105,14 @@ import { BrnPopoverImports } from '@spartan-ng/brain/popover';
         <label for="scheduledAt" class="text-right text-sm font-medium">
           Scheduled At
         </label>
-        <input
-          hlmInput
+        <hlm-date-picker
           id="scheduledAt"
           formControlName="scheduledAt"
-          type="datetime-local"
           class="col-span-3"
-        />
+          [formatDate]="formatDate"
+        >
+          Pick a date
+        </hlm-date-picker>
       </div>
 
       <!-- Status -->
@@ -180,8 +184,10 @@ export class DeliveryFormComponent implements OnInit {
     status: ['scheduled', Validators.required],
     addressId: ['', Validators.required],
     instructions: [''],
-    scheduledAt: [new Date().toISOString().slice(0, 16), Validators.required]
+    scheduledAt: [new Date(), Validators.required]
   });
+
+  protected readonly formatDate = UtilService.formatLongDate;
 
   public ngOnInit() {
     const delivery = this.delivery();
@@ -192,7 +198,7 @@ export class DeliveryFormComponent implements OnInit {
         status: delivery.status,
         addressId: delivery.addressId,
         instructions: delivery.instructions,
-        scheduledAt: delivery.scheduledAt ? new Date(delivery.scheduledAt).toISOString().slice(0, 16) : ''
+        scheduledAt: delivery.scheduledAt ? new Date(delivery.scheduledAt) : new Date()
       });
 
       // We rely on the user passed 'customers' input or we should find it.
@@ -252,7 +258,7 @@ export class DeliveryFormComponent implements OnInit {
       addressId: formValue.addressId ?? '',
       packageIds: Array.from(this._selectedPackageIds),
       instructions: formValue.instructions ?? undefined,
-      scheduledAt: formValue.scheduledAt ? new Date(formValue.scheduledAt) : new Date(),
+      scheduledAt: formValue.scheduledAt instanceof Date ? formValue.scheduledAt : new Date(),
       createdAt: delivery?.createdAt ?? new Date(),
       updatedAt: new Date()
     };

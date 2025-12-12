@@ -66,6 +66,18 @@
       ],
       "@spartan-ng/helm/command": [
         "./libs/ui/command/src/index.ts"
+      ],
+      "@spartan-ng/helm/date-picker": [
+        "./libs/ui/date-picker/src/index.ts"
+      ],
+      "@spartan-ng/helm/calendar": [
+        "./libs/ui/calendar/src/index.ts"
+      ],
+      "@spartan-ng/helm/select": [
+        "./libs/ui/select/src/index.ts"
+      ],
+      "@spartan-ng/helm/form-field": [
+        "./libs/ui/form-field/src/index.ts"
       ]
     }
   },
