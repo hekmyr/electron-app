@@ -7,7 +7,7 @@ import { HlmInput } from "@libs/ui/input/src";
 import { HlmDatePicker } from "@libs/ui/date-picker/src";
 import { AddressDTO } from "@shared/dto/address-dto.interface";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
-import { DeliveryDTO } from "@shared/dto/delivery-dto.interface";
+import { DeliveryDTO, DeliveryStatus } from "@shared/dto/delivery-dto.interface";
 import { PackageDTO } from "@shared/dto/package-dto.interface";
 import { UtilService } from "@/shared/services/util.service";
 
@@ -44,15 +44,16 @@ import { BrnPopoverImports } from '@spartan-ng/brain/popover';
       <div class="grid grid-cols-4 items-center gap-4">
         <label class="text-right text-sm font-medium">Customer</label>
         <div class="col-span-3">
-           <brn-popover [state]="_customerComboboxState()" (stateChanged)="_customerComboboxState.set($event)" sideOffset="5">
+           <brn-popover [state]="_customerComboboxStateSignal()" (stateChanged)="_customerComboboxStateSignal.set($event)" sideOffset="5">
             <button
               class="w-full justify-between"
               variant="outline"
               brnPopoverTrigger
-              (click)="_customerComboboxState.set('open')"
+              (click)="_customerComboboxStateSignal.set('open')"
               hlmBtn
             >
-              {{ _selectedCustomer() ? (_selectedCustomer()?.firstName + ' ' + _selectedCustomer()?.lastName) : 'Select customer...' }}
+              @let selectedCustomer = _selectedCustomerSignal();
+              {{ selectedCustomer ? (selectedCustomer.firstName + ' ' + selectedCustomer.lastName) : 'Select customer...' }}
               <ng-icon hlm size="sm" name="lucideChevronsUpDown" class="opacity-50" />
             </button>
             <hlm-command *brnPopoverContent="let ctx" hlmPopoverContent class="w-[300px] p-0">
@@ -64,12 +65,12 @@ import { BrnPopoverImports } from '@spartan-ng/brain/popover';
               <hlm-command-list>
                 <hlm-command-group>
                   @for (customer of customers(); track customer.id) {
-                    <button hlm-command-item [value]="customer.id" (selected)="selectCustomer(customer)">
+                    <button type="button" hlm-command-item [value]="customer.id" (selected)="selectCustomer(customer)">
                       <span>{{ customer.firstName }} {{ customer.lastName }}</span>
                       <ng-icon
                         hlm
                         class="ml-auto"
-                        [class.opacity-0]="_selectedCustomer()?.id !== customer.id"
+                        [class.opacity-0]="_selectedCustomerSignal()?.id !== customer.id"
                         name="lucideCheck"
                         hlmCommandIcon
                       />
@@ -86,10 +87,11 @@ import { BrnPopoverImports } from '@spartan-ng/brain/popover';
       <div class="grid grid-cols-4 items-center gap-4">
         <label class="text-right text-sm font-medium">Address</label>
          <div class="col-span-3">
-            @if (_customerAddresses().length > 0) {
+            @let customerAddresses = _customerAddressesSignal();
+            @if (customerAddresses.length > 0) {
                  <select class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         formControlName="addressId">
-                    @for (addr of _customerAddresses(); track addr.id) {
+                    @for (addr of customerAddresses; track addr.id) {
                         <option [value]="addr.id">{{ addr.street }} {{ addr.houseNumber }}, {{ addr.city }}</option>
                     }
                  </select>
@@ -117,15 +119,49 @@ import { BrnPopoverImports } from '@spartan-ng/brain/popover';
 
       <!-- Status -->
       <div class="grid grid-cols-4 items-center gap-4">
-        <label for="status" class="text-right text-sm font-medium">
+        <label class="text-right text-sm font-medium">
           Status
         </label>
-        <input
-          hlmInput
-          id="status"
-          formControlName="status"
-          class="col-span-3"
-        />
+        <div class="col-span-3">
+          @let statusComboboxState = _statusComboboxStateSignal();
+          @let selectedStatus = _selectedStatusSignal();
+          <brn-popover [state]="statusComboboxState" (stateChanged)="_statusComboboxStateSignal.set($event)" sideOffset="5">
+            <button
+              type="button"
+              class="w-full justify-between font-normal"
+              variant="outline"
+              brnPopoverTrigger
+              (click)="_statusComboboxStateSignal.set('open')"
+              hlmBtn
+            >
+              {{ selectedStatus ? _getStatusLabel(selectedStatus) : 'Select status...' }}
+              <ng-icon hlm size="sm" name="lucideChevronsUpDown" class="opacity-50" />
+            </button>
+            <hlm-command *brnPopoverContent="let ctx" hlmPopoverContent class="w-[200px] p-0">
+              <hlm-command-search>
+                <ng-icon hlm name="lucideSearch" />
+                <input placeholder="Search status..." hlm-command-search-input />
+              </hlm-command-search>
+              <div *brnCommandEmpty hlmCommandEmpty>No statuses found.</div>
+              <hlm-command-list>
+                <hlm-command-group>
+                  @for (status of deliveryStatusOptions; track status) {
+                    <button type="button" hlm-command-item class="font-normal" [value]="status" (selected)="selectStatus(status)">
+                      <span>{{ _getStatusLabel(status) }}</span>
+                      <ng-icon
+                        hlm
+                        class="ml-auto"
+                        [class.opacity-0]="selectedStatus !== status"
+                        name="lucideCheck"
+                        hlmCommandIcon
+                      />
+                    </button>
+                  }
+                </hlm-command-group>
+              </hlm-command-list>
+            </hlm-command>
+          </brn-popover>
+        </div>
       </div>
 
       <!-- Instructions -->
@@ -145,8 +181,9 @@ import { BrnPopoverImports } from '@spartan-ng/brain/popover';
        <div class="grid grid-cols-4 gap-4">
         <label class="text-right text-sm font-medium pt-2">Packages</label>
         <div class="col-span-3 border rounded-md p-2 max-h-40 overflow-y-auto">
-            @if (_customerPackages().length > 0) {
-                 @for (pkg of _customerPackages(); track pkg.id) {
+            @let customerPackages = _customerPackagesSignal();
+            @if (customerPackages.length > 0) {
+                 @for (pkg of customerPackages; track pkg.id) {
                     <div class="flex items-center space-x-2 mb-2">
                         <input type="checkbox" [id]="pkg.id" [value]="pkg.id" (change)="togglePackage(pkg.id, $event)"
                             [checked]="_selectedPackageIds.has(pkg.id)"
@@ -173,11 +210,34 @@ export class DeliveryFormComponent implements OnInit {
   public readonly save = output<{ id: string; delivery: DeliveryDTO }>();
 
   // State
-  protected readonly _customerComboboxState = signal<'closed' | 'open'>('closed');
-  protected readonly _selectedCustomer = signal<CustomerDTO | undefined>(undefined);
-  protected readonly _customerAddresses = signal<AddressDTO[]>([]);
-  protected readonly _customerPackages = signal<PackageDTO[]>([]);
+  protected readonly _customerComboboxStateSignal = signal<'closed' | 'open'>('closed');
+  protected readonly _selectedCustomerSignal = signal<CustomerDTO | undefined>(undefined);
+  protected readonly _statusComboboxStateSignal = signal<'closed' | 'open'>('closed');
+  protected readonly _selectedStatusSignal = signal<DeliveryStatus | undefined>(undefined);
+  protected readonly _customerAddressesSignal = signal<AddressDTO[]>([]);
+  protected readonly _customerPackagesSignal = signal<PackageDTO[]>([]);
   protected readonly _selectedPackageIds = new Set<string>();
+
+  private readonly _statusMap: Record<DeliveryStatus, string> = {
+    'scheduled': 'Scheduled',
+    'in-transit': 'In transit',
+    'delivered': 'Delivered',
+    'failed': 'Failed',
+    'cancelled': 'Cancelled',
+  };
+
+  protected readonly deliveryStatusOptions: DeliveryStatus[] = ['scheduled', 'in-transit', 'delivered', 'failed', 'cancelled'];
+
+  protected _getStatusLabel(status: DeliveryStatus | undefined): string {
+    if (!status) return '';
+    return this._statusMap[status] || status;
+  }
+
+  public selectStatus(status: DeliveryStatus) {
+    this._selectedStatusSignal.set(status);
+    this._statusComboboxStateSignal.set('closed');
+    this._form.patchValue({ status });
+  }
 
   protected readonly _form = this._fb.group({
     customerId: ['', Validators.required],
@@ -214,15 +274,15 @@ export class DeliveryFormComponent implements OnInit {
   }
 
   public async selectCustomer(customer: CustomerDTO) {
-    this._selectedCustomer.set(customer);
-    this._customerComboboxState.set('closed');
+    this._selectedCustomerSignal.set(customer);
+    this._customerComboboxStateSignal.set('closed');
     this._form.patchValue({ customerId: customer.id });
 
     // Fetch details
     const details = await this._dataService.customers.findDetailsById(customer.id);
     if (details) {
-        this._customerAddresses.set(details.addresses);
-        this._customerPackages.set(details.packages);
+        this._customerAddressesSignal.set(details.addresses);
+        this._customerPackagesSignal.set(details.packages);
 
         // Auto-select first address if none selected or invalid
         if (details.addresses.length > 0) {
