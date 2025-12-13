@@ -1,16 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HlmInput } from '@libs/ui/input/src';
-import { isPackageStatus, packageStatus, PackageDTO, PackageStatus } from '@shared/dto/package-dto.interface';
-
-// Spartan UI Imports
+import { CustomerComboboxComponent } from '@libs/customer';
 import { HlmButtonImports } from '@libs/ui/button/src';
 import { HlmCommandImports } from '@libs/ui/command/src';
 import { HlmIconImports } from '@libs/ui/icon/src';
+import { HlmInput } from '@libs/ui/input/src';
 import { HlmPopoverImports } from '@libs/ui/popover/src';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideCheck, lucideChevronsUpDown, lucideSearch } from '@ng-icons/lucide';
+import { CustomerDTO } from '@shared/dto/customer-dto.interface';
+import { PackageDTO, PackageStatus, isPackageStatus, packageStatus } from '@shared/dto/package-dto.interface';
 import { BrnCommandImports } from '@spartan-ng/brain/command';
 import { BrnPopoverImports } from '@spartan-ng/brain/popover';
 
@@ -28,14 +28,13 @@ import { BrnPopoverImports } from '@spartan-ng/brain/popover';
     HlmButtonImports,
     BrnPopoverImports,
     HlmPopoverImports,
+    CustomerComboboxComponent
   ],
   providers: [provideIcons({ lucideChevronsUpDown, lucideSearch, lucideCheck })],
   template: `
     <form
       class="grid gap-4"
       [formGroup]="form"
-      (ngSubmit)="submit()"
-      id="edit-package-form"
     >
       <h3 class="text-lg font-medium">Package Details</h3>
       <div class="grid gap-4">
@@ -48,10 +47,10 @@ import { BrnPopoverImports } from '@spartan-ng/brain/popover';
           <span>Description</span>
           <input hlmInput type="text" formControlName="description" />
         </label>
-        
+
         <label class="grid gap-2 text-sm">
-          <span>Customer ID</span>
-          <input hlmInput type="text" formControlName="customerId" />
+          <span>Customer</span>
+          <customer-combobox [customers]="customers()" (selectedCustomer)="selectCustomer($event)"/>
         </label>
 
         <label class="grid gap-2 text-sm">
@@ -106,6 +105,7 @@ import { BrnPopoverImports } from '@spartan-ng/brain/popover';
 })
 export class PackageFormComponent implements OnInit {
   public readonly packageSignal = input<PackageDTO>(undefined, { alias: 'package' });
+  public readonly customers = input<CustomerDTO[]>([]);
   public readonly save = output<{ id: string; package: PackageDTO }>();
 
   private readonly _formBuilder = inject(NonNullableFormBuilder);
@@ -136,6 +136,10 @@ export class PackageFormComponent implements OnInit {
     this._selectedStatusSignal.set(status);
     this._statusComboboxStateSignal.set('closed');
     this.form.patchValue({ status });
+  }
+
+  public selectCustomer(customer: CustomerDTO) {
+    this.form.patchValue({ customerId: customer.id });
   }
 
   public ngOnInit() {

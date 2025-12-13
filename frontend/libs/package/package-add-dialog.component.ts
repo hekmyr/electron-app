@@ -1,6 +1,7 @@
-import { Component, ElementRef, output, viewChild } from "@angular/core";
+import { Component, ElementRef, input, output, viewChild } from "@angular/core";
 import { HlmAlertDialogImports } from "@libs/ui/alert-dialog/src";
 import { HlmButton } from "@libs/ui/button/src";
+import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 import { PackageDTO } from "@shared/dto/package-dto.interface";
 import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
 import { PackageFormComponent } from "./package-form.component";
@@ -31,6 +32,7 @@ import { PackageFormComponent } from "./package-form.component";
 
         <package-form
           #formComponent
+          [customers]="customers()"
           (save)="handleSave($event, ctx)"
         />
 
@@ -57,6 +59,7 @@ import { PackageFormComponent } from "./package-form.component";
 export class PackageAddDialogComponent {
   protected readonly triggerRefSignal = viewChild.required<ElementRef<HTMLButtonElement>>('triggerRef');
 
+  public readonly customers = input<CustomerDTO[]>([]);
   public readonly save = output<{ id: string; package: PackageDTO }>();
 
   public open() {
