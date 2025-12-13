@@ -1,25 +1,25 @@
 import { ContextService } from "@/shared/services/context";
 import { DataServiceImpl } from "@/shared/services/data";
+import { UtilService } from "@/shared/services/util.service";
 import { CommonModule } from '@angular/common';
 import { Component, inject, input, OnInit, output, signal } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
-import { HlmInput } from "@libs/ui/input/src";
+import { HlmButtonImports } from '@libs/ui/button/src';
+import { HlmCommandImports } from '@libs/ui/command/src';
 import { HlmDatePicker } from "@libs/ui/date-picker/src";
+import { HlmIconImports } from '@libs/ui/icon/src';
+import { HlmInput } from "@libs/ui/input/src";
+import { HlmPopoverImports } from '@libs/ui/popover/src';
+import { HlmSelectImports } from '@libs/ui/select/src';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideCheck, lucideChevronsUpDown, lucideSearch } from '@ng-icons/lucide';
 import { AddressDTO } from "@shared/dto/address-dto.interface";
 import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 import { DeliveryDTO, DeliveryStatus } from "@shared/dto/delivery-dto.interface";
 import { PackageDTO } from "@shared/dto/package-dto.interface";
-import { UtilService } from "@/shared/services/util.service";
-
-// Spartan UI Imports
-import { HlmButtonImports } from '@libs/ui/button/src';
-import { HlmCommandImports } from '@libs/ui/command/src';
-import { HlmIconImports } from '@libs/ui/icon/src';
-import { HlmPopoverImports } from '@libs/ui/popover/src';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideCheck, lucideChevronsUpDown, lucideSearch } from '@ng-icons/lucide';
 import { BrnCommandImports } from '@spartan-ng/brain/command';
 import { BrnPopoverImports } from '@spartan-ng/brain/popover';
+import { BrnSelectImports } from '@spartan-ng/brain/select';
 
 @Component({
   selector: 'delivery-form',
@@ -36,6 +36,8 @@ import { BrnPopoverImports } from '@spartan-ng/brain/popover';
     HlmButtonImports,
     BrnPopoverImports,
     HlmPopoverImports,
+    BrnSelectImports,
+    HlmSelectImports,
   ],
   providers: [provideIcons({ lucideChevronsUpDown, lucideSearch, lucideCheck })],
   template: `
@@ -87,17 +89,42 @@ import { BrnPopoverImports } from '@spartan-ng/brain/popover';
       <div class="grid grid-cols-4 items-center gap-4">
         <label class="text-right text-sm font-medium">Address</label>
          <div class="col-span-3">
-            @let customerAddresses = _customerAddressesSignal();
-            @if (customerAddresses.length > 0) {
-                 <select class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        formControlName="addressId">
-                    @for (addr of customerAddresses; track addr.id) {
-                        <option [value]="addr.id">{{ addr.street }} {{ addr.houseNumber }}, {{ addr.city }}</option>
-                    }
-                 </select>
-            } @else {
-                 <div class="text-sm text-muted-foreground">No addresses found for this customer.</div>
-            }
+            <brn-popover [state]="_addressComboboxStateSignal()" (stateChanged)="_addressComboboxStateSignal.set($event)" sideOffset="5">
+            <button
+              class="w-full justify-between"
+              variant="outline"
+              brnPopoverTrigger
+              (click)="_addressComboboxStateSignal.set('open')"
+              hlmBtn
+            >
+              @let selectedAddress = _selectedAddressSignal();
+              {{ selectedAddress ? (selectedAddress.street + ' ' + selectedAddress.houseNumber + ', ' + selectedAddress.city) : 'Select address...' }}
+              <ng-icon hlm size="sm" name="lucideChevronsUpDown" class="opacity-50" />
+            </button>
+            <hlm-command *brnPopoverContent="let ctx" hlmPopoverContent class="w-[300px] p-0">
+              <hlm-command-search>
+                <ng-icon hlm name="lucideSearch" />
+                <input placeholder="Search address..." hlm-command-search-input />
+              </hlm-command-search>
+              <div *brnCommandEmpty hlmCommandEmpty>No addresses found.</div>
+              <hlm-command-list>
+                <hlm-command-group>
+                  @for (address of _customerAddressesSignal(); track address.id) {
+                    <button type="button" hlm-command-item [value]="address.id" (selected)="selectAddress(address)">
+                      <span>{{ address.street }} {{ address.houseNumber }}, {{ address.city }}</span>
+                      <ng-icon
+                        hlm
+                        class="ml-auto"
+                        [class.opacity-0]="_selectedAddressSignal()?.id !== address.id"
+                        name="lucideCheck"
+                        hlmCommandIcon
+                      />
+                    </button>
+                  }
+                </hlm-command-group>
+              </hlm-command-list>
+            </hlm-command>
+          </brn-popover>
          </div>
       </div>
 
@@ -110,7 +137,7 @@ import { BrnPopoverImports } from '@spartan-ng/brain/popover';
         <hlm-date-picker
           id="scheduledAt"
           formControlName="scheduledAt"
-          class="col-span-3"
+          class="col-span-3 w-full"
           [formatDate]="formatDate"
         >
           Pick a date
@@ -212,6 +239,8 @@ export class DeliveryFormComponent implements OnInit {
   // State
   protected readonly _customerComboboxStateSignal = signal<'closed' | 'open'>('closed');
   protected readonly _selectedCustomerSignal = signal<CustomerDTO | undefined>(undefined);
+  protected readonly _addressComboboxStateSignal = signal<'closed' | 'open'>('closed');
+  protected readonly _selectedAddressSignal = signal<AddressDTO | undefined>(undefined);
   protected readonly _statusComboboxStateSignal = signal<'closed' | 'open'>('closed');
   protected readonly _selectedStatusSignal = signal<DeliveryStatus | undefined>(undefined);
   protected readonly _customerAddressesSignal = signal<AddressDTO[]>([]);
@@ -264,7 +293,7 @@ export class DeliveryFormComponent implements OnInit {
       // We rely on the user passed 'customers' input or we should find it.
       const customer = this.customers().find(c => c.id === delivery.customerId);
       if (customer) {
-        this.selectCustomer(customer);
+        this.selectCustomer(customer, delivery.addressId);
         // Also need to select packages. DeliveryDTO has packageIds.
         if (delivery.packageIds) {
             delivery.packageIds.forEach(id => this._selectedPackageIds.add(id));
@@ -273,7 +302,7 @@ export class DeliveryFormComponent implements OnInit {
     }
   }
 
-  public async selectCustomer(customer: CustomerDTO) {
+  public async selectCustomer(customer: CustomerDTO, selectedAddressId?: string) {
     this._selectedCustomerSignal.set(customer);
     this._customerComboboxStateSignal.set('closed');
     this._form.patchValue({ customerId: customer.id });
@@ -284,14 +313,29 @@ export class DeliveryFormComponent implements OnInit {
         this._customerAddressesSignal.set(details.addresses);
         this._customerPackagesSignal.set(details.packages);
 
-        // Auto-select first address if none selected or invalid
-        if (details.addresses.length > 0) {
-             const currentAddr = this._form.get('addressId')?.value;
-             if (!currentAddr || !details.addresses.find(a => a.id === currentAddr)) {
-                 this._form.patchValue({ addressId: details.addresses[0].id });
-             }
+        let addressToSelect: AddressDTO | undefined;
+
+        if (selectedAddressId) {
+            addressToSelect = details.addresses.find(a => a.id === selectedAddressId);
+        }
+
+        if (!addressToSelect && details.addresses.length > 0) {
+            addressToSelect = details.addresses[0];
+        }
+
+        if (addressToSelect) {
+            this.selectAddress(addressToSelect);
+        } else {
+            this._selectedAddressSignal.set(undefined);
+            this._form.patchValue({ addressId: '' });
         }
     }
+  }
+
+  public selectAddress(address: AddressDTO) {
+    this._selectedAddressSignal.set(address);
+    this._addressComboboxStateSignal.set('closed');
+    this._form.patchValue({ addressId: address.id });
   }
 
   public togglePackage(id: string, event: Event) {
