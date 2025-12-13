@@ -4,6 +4,7 @@ import { UtilService } from "@/shared/services/util.service";
 import { CommonModule } from '@angular/common';
 import { Component, inject, input, OnInit, output, signal } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+import { CustomerComboboxComponent } from '@libs/customer';
 import { HlmButtonImports } from '@libs/ui/button/src';
 import { HlmCommandImports } from '@libs/ui/command/src';
 import { HlmDatePicker } from "@libs/ui/date-picker/src";
@@ -38,6 +39,7 @@ import { BrnSelectImports } from '@spartan-ng/brain/select';
     HlmPopoverImports,
     BrnSelectImports,
     HlmSelectImports,
+    CustomerComboboxComponent,
   ],
   providers: [provideIcons({ lucideChevronsUpDown, lucideSearch, lucideCheck })],
   template: `
@@ -46,42 +48,10 @@ import { BrnSelectImports } from '@spartan-ng/brain/select';
       <div class="grid grid-cols-4 items-center gap-4">
         <label class="text-right text-sm font-medium">Customer</label>
         <div class="col-span-3">
-           <brn-popover [state]="_customerComboboxStateSignal()" (stateChanged)="_customerComboboxStateSignal.set($event)" sideOffset="5">
-            <button
-              class="w-full justify-between"
-              variant="outline"
-              brnPopoverTrigger
-              (click)="_customerComboboxStateSignal.set('open')"
-              hlmBtn
-            >
-              @let selectedCustomer = _selectedCustomerSignal();
-              {{ selectedCustomer ? (selectedCustomer.firstName + ' ' + selectedCustomer.lastName) : 'Select customer...' }}
-              <ng-icon hlm size="sm" name="lucideChevronsUpDown" class="opacity-50" />
-            </button>
-            <hlm-command *brnPopoverContent="let ctx" hlmPopoverContent class="w-[300px] p-0">
-              <hlm-command-search>
-                <ng-icon hlm name="lucideSearch" />
-                <input placeholder="Search customer..." hlm-command-search-input />
-              </hlm-command-search>
-              <div *brnCommandEmpty hlmCommandEmpty>No customers found.</div>
-              <hlm-command-list>
-                <hlm-command-group>
-                  @for (customer of customers(); track customer.id) {
-                    <button type="button" hlm-command-item [value]="customer.id" (selected)="selectCustomer(customer)">
-                      <span>{{ customer.firstName }} {{ customer.lastName }}</span>
-                      <ng-icon
-                        hlm
-                        class="ml-auto"
-                        [class.opacity-0]="_selectedCustomerSignal()?.id !== customer.id"
-                        name="lucideCheck"
-                        hlmCommandIcon
-                      />
-                    </button>
-                  }
-                </hlm-command-group>
-              </hlm-command-list>
-            </hlm-command>
-          </brn-popover>
+          <customer-combobox
+            [customers]="customers()"
+            (selectedCustomer)="selectCustomer($event)"
+          />
         </div>
       </div>
 
@@ -305,7 +275,6 @@ export class DeliveryFormComponent implements OnInit {
   public async selectCustomer(customer: CustomerDTO, selectedAddressId?: string) {
     this._selectedCustomerSignal.set(customer);
     this._customerComboboxStateSignal.set('closed');
-    this._form.patchValue({ customerId: customer.id });
 
     // Fetch details
     const details = await this._dataService.customers.findDetailsById(customer.id);
