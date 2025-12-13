@@ -1,6 +1,6 @@
+import { DateFormatPipe } from "@/shared/pipes/date-format.pipe";
 import { ContextService } from "@/shared/services/context";
 import { DataServiceImpl } from "@/shared/services/data";
-import { DateFormatPipe } from "@/shared/pipes/date-format.pipe";
 import { Component, ElementRef, inject, OnInit, signal, viewChild } from "@angular/core";
 import { BreadcrumbItem, QuickAction } from "@libs/app/header.component";
 import { ResourceAction, ResourceTableComponent } from "@libs/app/resource-table/src";
@@ -12,6 +12,7 @@ import { HlmAlertDialogImports } from "@libs/ui/alert-dialog/src";
 import { HlmButton } from "@libs/ui/button/src";
 import { provideIcons } from "@ng-icons/core";
 import { lucidePenLine, lucidePlus, lucideTrash2 } from "@ng-icons/lucide";
+import { CustomerDTO } from "@shared/dto/customer-dto.interface";
 import { PackageDTO } from "@shared/dto/package-dto.interface";
 import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
 import { ColumnDef } from "@tanstack/angular-table";
@@ -49,6 +50,7 @@ import { ColumnDef } from "@tanstack/angular-table";
 
       <package-add-dialog
         #addDialogRef
+        [customers]="_customers()"
         (save)="handleCreate($event)"
       />
 
@@ -63,6 +65,7 @@ import { ColumnDef } from "@tanstack/angular-table";
           <package-form
             #editForm
             [package]="selectedPackage"
+            [customers]="_customers()"
             (save)="handleEditSave($event, ctx)"
           />
           <hlm-alert-dialog-footer>
@@ -103,6 +106,7 @@ export class PackagesPage implements OnInit {
 
   private _packagesMap: Map<string, PackageDTO> = new Map();
   protected readonly _packages = signal<PackageDTO[]>([]);
+  protected readonly _customers = signal<CustomerDTO[]>([]);
 
   protected readonly _addDialogRefSignal = viewChild.required<PackageAddDialogComponent>('addDialogRef');
   protected readonly _editTriggerRefSignal = viewChild.required<ElementRef<HTMLButtonElement>>('editTriggerRef');
@@ -182,6 +186,8 @@ export class PackagesPage implements OnInit {
   public async ngOnInit() {
     this._packagesMap = await this._dataService.packages.findPackages(50);
     this._packages.set(Array.from(this._packagesMap.values()));
+    const customers = await this._dataService.customers.findCustomers(100);
+    this._customers.set(Array.from(customers.values()));
   }
 
   protected handleCreate(event: { id: string; package: PackageDTO }) {
