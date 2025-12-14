@@ -61,7 +61,7 @@ import { BrnSelectImports } from '@spartan-ng/brain/select';
          <div class="col-span-3">
             <brn-popover [state]="_addressComboboxStateSignal()" (stateChanged)="_addressComboboxStateSignal.set($event)" sideOffset="5">
             <button
-              class="w-full justify-between"
+              class="w-full justify-between font-normal"
               variant="outline"
               brnPopoverTrigger
               (click)="_addressComboboxStateSignal.set('open')"
