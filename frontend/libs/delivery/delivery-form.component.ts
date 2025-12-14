@@ -275,6 +275,7 @@ export class DeliveryFormComponent implements OnInit {
   public async selectCustomer(customer: CustomerDTO, selectedAddressId?: string) {
     this._selectedCustomerSignal.set(customer);
     this._customerComboboxStateSignal.set('closed');
+    this._form.patchValue({ customerId: customer.id });
 
     // Fetch details
     const details = await this._dataService.customers.findDetailsById(customer.id);
