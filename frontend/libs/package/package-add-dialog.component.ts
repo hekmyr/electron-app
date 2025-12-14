@@ -22,7 +22,7 @@ import { PackageFormComponent } from "./package-form.component";
         class="hidden"
         brnAlertDialogTrigger
       ></button>
-      <hlm-alert-dialog-content *brnAlertDialogContent="let ctx">
+      <hlm-alert-dialog-content *brnAlertDialogContent="let ctx" size="md">
         <hlm-alert-dialog-header>
           <h2 hlmAlertDialogTitle>Add package</h2>
           <p hlmAlertDialogDescription>

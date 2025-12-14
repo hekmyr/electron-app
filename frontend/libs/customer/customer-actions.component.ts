@@ -32,7 +32,7 @@ import { CustomerFormComponent } from "./customer-form.component";
               <ng-icon hlm [name]="item.icon.name" />
             </button>
 
-            <hlm-alert-dialog-content *brnAlertDialogContent="let dialogCtx">
+            <hlm-alert-dialog-content *brnAlertDialogContent="let dialogCtx" [size]="item.label === 'Delete' ? 'sm' : 'md'">
               @if (item.dialog.title || item.dialog.description) {
                 <hlm-alert-dialog-header>
                   @if (item.dialog.title) {
