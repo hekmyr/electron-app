@@ -16,6 +16,7 @@ export class DeliveryRepositoryImpl implements DeliveryRepository {
         scheduledAt: delivery.scheduledAt,
         customerId: delivery.customerId,
         addressId: delivery.addressId,
+        instruction: delivery.instruction,
         packages: {
           connect: delivery.packageIds.map(id => ({ id }))
         }
@@ -62,6 +63,7 @@ export class DeliveryRepositoryImpl implements DeliveryRepository {
         scheduledAt: delivery.scheduledAt,
         customerId: delivery.customerId,
         addressId: delivery.addressId,
+        instruction: delivery.instruction,
         packages: {
             set: delivery.packageIds.map(id => ({ id }))
         }

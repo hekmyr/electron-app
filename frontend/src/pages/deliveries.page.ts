@@ -165,7 +165,7 @@ export class DeliveriesPage implements OnInit {
     },
     {
       id: 'instructions',
-      accessorKey: 'instructions',
+      accessorKey: 'instruction',
       header: 'Instructions',
       cell: info => info.getValue()
     },

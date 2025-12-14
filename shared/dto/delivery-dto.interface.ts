@@ -10,7 +10,7 @@ export interface DeliveryDTO {
     status: DeliveryStatus;
     addressId: string;
     packageIds: string[];
-    instructions?: string;
+    instruction?: string;
     scheduledAt: Date;
     createdAt: Date;
     updatedAt: Date;
