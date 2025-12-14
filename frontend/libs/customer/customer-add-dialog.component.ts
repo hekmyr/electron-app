@@ -21,7 +21,7 @@ import { CustomerDTO } from "@shared/dto/customer-dto.interface";
         class="hidden"
         brnAlertDialogTrigger
       ></button>
-      <hlm-alert-dialog-content *brnAlertDialogContent="let ctx">
+      <hlm-alert-dialog-content *brnAlertDialogContent="let ctx" size="md">
         <hlm-alert-dialog-header>
           <h2 hlmAlertDialogTitle>Add customer</h2>
           <p hlmAlertDialogDescription>

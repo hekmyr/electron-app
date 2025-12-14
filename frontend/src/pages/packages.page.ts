@@ -58,7 +58,7 @@ import { ColumnDef } from "@tanstack/angular-table";
       <!-- Edit Dialog -->
       <hlm-alert-dialog>
         <button #editTriggerRef class="hidden" brnAlertDialogTrigger></button>
-        <hlm-alert-dialog-content *brnAlertDialogContent="let ctx">
+        <hlm-alert-dialog-content *brnAlertDialogContent="let ctx" size="md">
           <hlm-alert-dialog-header>
             <h2 hlmAlertDialogTitle>Edit package</h2>
           </hlm-alert-dialog-header>
@@ -78,7 +78,7 @@ import { ColumnDef } from "@tanstack/angular-table";
       <!-- Delete Dialog -->
       <hlm-alert-dialog>
         <button #deleteTriggerRef class="hidden" brnAlertDialogTrigger></button>
-        <hlm-alert-dialog-content *brnAlertDialogContent="let ctx">
+        <hlm-alert-dialog-content *brnAlertDialogContent="let ctx" size="sm">
           <hlm-alert-dialog-header>
             <h2 hlmAlertDialogTitle>Delete package</h2>
             <p hlmAlertDialogDescription>This action cannot be undone.</p>

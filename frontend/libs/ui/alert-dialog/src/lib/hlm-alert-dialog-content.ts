@@ -3,6 +3,8 @@ import { injectExposesStateProvider } from '@spartan-ng/brain/core';
 import { hlm } from '@spartan-ng/helm/utils';
 import type { ClassValue } from 'clsx';
 
+export type AlertDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+
 @Component({
 	selector: 'hlm-alert-dialog-content',
 	host: {
@@ -20,10 +22,24 @@ export class HlmAlertDialogContent {
 	public readonly state = this._stateProvider?.state ?? signal('closed');
 
 	public readonly userClass = input<ClassValue>('', { alias: 'class' });
-	protected readonly _computedClass = computed(() =>
-		hlm(
-			'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 relative z-50 mx-auto grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-lg border p-6 shadow-lg data-[state=closed]:duration-200 data-[state=open]:duration-200 sm:mx-0 sm:max-w-lg',
+	public readonly size = input<AlertDialogSize | null>(null);
+
+	protected readonly _computedClass = computed(() => {
+		const size = this.size();
+		if (!size) {
+			return hlm(
+				'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 relative z-50 mx-auto grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-lg border p-6 shadow-lg data-[state=closed]:duration-200 data-[state=open]:duration-200 sm:mx-0 sm:max-w-lg',
+				this.userClass(),
+			);
+		}
+		return hlm(
+			'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 relative z-50 mx-auto grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-lg border p-6 shadow-lg data-[state=closed]:duration-200 data-[state=open]:duration-200 sm:mx-0',
+			size === 'sm' ? 'sm:w-[24rem]' : '',
+			size === 'md' ? 'sm:w-[32rem]' : '',
+			size === 'lg' ? 'sm:w-[42rem]' : '',
+			size === 'xl' ? 'sm:w-[56rem]' : '',
+			size === 'full' ? 'sm:w-full' : '',
 			this.userClass(),
-		),
-	);
+		);
+	});
 }
