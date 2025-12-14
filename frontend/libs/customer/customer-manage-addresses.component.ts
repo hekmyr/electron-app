@@ -75,14 +75,14 @@ import { AddressFormComponent } from './address-form.component';
           </div>
 
           <!-- Section 2: Addresses Table -->
-          <div class="border rounded-md overflow-hidden">
+          <div class="border rounded-md max-h-[300px] overflow-y-auto">
             <table hlmTable>
               <thead hlmTHead>
                 <tr hlmTr>
-                  <th hlmTh>Street</th>
-                  <th hlmTh>City</th>
-                  <th hlmTh>Postal Code</th>
-                  <th hlmTh>Country</th>
+                  <th hlmTh class="sticky top-0 bg-background z-10">Street</th>
+                  <th hlmTh class="sticky top-0 bg-background z-10">City</th>
+                  <th hlmTh class="sticky top-0 bg-background z-10">Postal Code</th>
+                  <th hlmTh class="sticky top-0 bg-background z-10">Country</th>
                 </tr>
               </thead>
               <tbody hlmTBody>
