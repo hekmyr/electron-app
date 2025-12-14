@@ -102,7 +102,7 @@ export function createMockDelivery(overrides?: Partial<DeliveryDTO>) {
     status: 'scheduled',
     addressId: `${Math.floor(Math.random() * 10000)}`,
     packageIds: [`${Math.floor(Math.random() * 10000)}`],
-    instructions: `Instructions for delivery ${Math.floor(Math.random() * 100)}`,
+    instruction: `Instructions for delivery ${Math.floor(Math.random() * 100)}`,
     scheduledAt: new Date(),
     createdAt: new Date(),
     updatedAt: new Date()

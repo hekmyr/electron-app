@@ -163,13 +163,13 @@ import { BrnSelectImports } from '@spartan-ng/brain/select';
 
       <!-- Instructions -->
       <div class="grid grid-cols-4 items-center gap-4">
-        <label for="instructions" class="text-right text-sm font-medium">
+        <label for="instruction" class="text-right text-sm font-medium">
           Instructions
         </label>
         <input
           hlmInput
-          id="instructions"
-          formControlName="instructions"
+          id="instruction"
+          formControlName="instruction"
           class="col-span-3"
         />
       </div>
@@ -242,7 +242,7 @@ export class DeliveryFormComponent implements OnInit {
     customerId: ['', Validators.required],
     status: ['scheduled', Validators.required],
     addressId: ['', Validators.required],
-    instructions: [''],
+    instruction: [''],
     scheduledAt: [new Date(), Validators.required]
   });
 
@@ -256,7 +256,7 @@ export class DeliveryFormComponent implements OnInit {
         customerId: delivery.customerId,
         status: delivery.status,
         addressId: delivery.addressId,
-        instructions: delivery.instructions,
+        instruction: delivery.instruction,
         scheduledAt: delivery.scheduledAt ? new Date(delivery.scheduledAt) : new Date()
       });
 
@@ -331,7 +331,7 @@ export class DeliveryFormComponent implements OnInit {
       status: (formValue.status as any) ?? 'scheduled',
       addressId: formValue.addressId ?? '',
       packageIds: Array.from(this._selectedPackageIds),
-      instructions: formValue.instructions ?? undefined,
+      instruction: formValue.instruction ?? undefined,
       scheduledAt: formValue.scheduledAt instanceof Date ? formValue.scheduledAt : new Date(),
       createdAt: delivery?.createdAt ?? new Date(),
       updatedAt: new Date()
