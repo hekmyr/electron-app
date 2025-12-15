@@ -12,6 +12,7 @@ import { HlmAlertDialogImports } from "@libs/ui/alert-dialog/src";
 import { HlmButton } from "@libs/ui/button/src";
 import { provideIcons } from "@ng-icons/core";
 import { lucidePenLine, lucidePlus, lucideTrash2 } from "@ng-icons/lucide";
+import { PackageDTO } from "@shared/dto/package-dto.interface";
 import { ReturnDTO } from "@shared/dto/return-dto.interface";
 import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
 import { ColumnDef } from "@tanstack/angular-table";
@@ -49,6 +50,7 @@ import { ColumnDef } from "@tanstack/angular-table";
 
       <return-add-dialog
         #addDialogRef
+        [packages]="_packages()"
         (save)="handleCreate($event)"
       />
 
@@ -63,6 +65,7 @@ import { ColumnDef } from "@tanstack/angular-table";
           <return-form
             #editForm
             [return]="selectedReturn"
+            [packages]="_packages()"
             (save)="handleEditSave($event, ctx)"
           />
           <hlm-alert-dialog-footer>
@@ -103,6 +106,7 @@ export class ReturnsPage implements OnInit {
 
     private _returnsMap: Map<string, ReturnDTO> = new Map();
     protected readonly _returns = signal<ReturnDTO[]>([]);
+    protected readonly _packages = signal<PackageDTO[]>([]);
 
     protected readonly _addDialogRefSignal = viewChild.required<ReturnAddDialogComponent>('addDialogRef');
     protected readonly _editTriggerRefSignal = viewChild.required<ElementRef<HTMLButtonElement>>('editTriggerRef');
@@ -182,6 +186,9 @@ export class ReturnsPage implements OnInit {
     public async ngOnInit() {
         this._returnsMap = await this._dataService.returns.findReturns(50);
         this._returns.set(Array.from(this._returnsMap.values()));
+
+        const packagesMap = await this._dataService.packages.findPackages(50);
+        this._packages.set(Array.from(packagesMap.values()));
     }
 
     protected handleCreate(event: { id: string; return: ReturnDTO }) {
