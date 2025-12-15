@@ -50,6 +50,7 @@ import { BrnSelectImports } from '@spartan-ng/brain/select';
         <div class="col-span-3">
           <customer-combobox
             [customers]="customers()"
+            [customer]="_selectedCustomerSignal()"
             (selectedCustomer)="selectCustomer($event)"
           />
         </div>
@@ -260,7 +261,8 @@ export class DeliveryFormComponent implements OnInit {
         scheduledAt: delivery.scheduledAt ? new Date(delivery.scheduledAt) : new Date()
       });
 
-      // We rely on the user passed 'customers' input or we should find it.
+      this._selectedStatusSignal.set(delivery.status);
+
       const customer = this.customers().find(c => c.id === delivery.customerId);
       if (customer) {
         this.selectCustomer(customer, delivery.addressId);
