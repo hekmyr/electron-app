@@ -1,6 +1,7 @@
-import { Component, ElementRef, output, viewChild } from "@angular/core";
+import { Component, ElementRef, input, output, viewChild } from "@angular/core";
 import { HlmAlertDialogImports } from "@libs/ui/alert-dialog/src";
 import { HlmButton } from "@libs/ui/button/src";
+import { PackageDTO } from "@shared/dto/package-dto.interface";
 import { ReturnDTO } from "@shared/dto/return-dto.interface";
 import { BrnAlertDialogImports } from "@spartan-ng/brain/alert-dialog";
 import { ReturnFormComponent } from "./return-form.component";
@@ -31,6 +32,7 @@ import { ReturnFormComponent } from "./return-form.component";
 
         <return-form
           #formComponent
+          [packages]="packages()"
           (save)="handleSave($event, ctx)"
         />
 
@@ -57,6 +59,7 @@ import { ReturnFormComponent } from "./return-form.component";
 export class ReturnAddDialogComponent {
     protected readonly triggerRefSignal = viewChild.required<ElementRef<HTMLButtonElement>>('triggerRef');
 
+    public readonly packages = input<PackageDTO[]>([]);
     public readonly save = output<{ id: string; return: ReturnDTO }>();
 
     public open() {
