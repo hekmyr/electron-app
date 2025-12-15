@@ -65,6 +65,7 @@ import { BrnPopoverImports } from '@spartan-ng/brain/popover';
 })
 export class CustomerComboboxComponent {
   public readonly customers = input<CustomerDTO[]>([]);
+  public readonly value = input<string | undefined>(undefined);
   public readonly customer = input<CustomerDTO | undefined>(undefined);
   public readonly selectedCustomer = output<CustomerDTO>();
 
@@ -73,6 +74,14 @@ export class CustomerComboboxComponent {
 
   constructor() {
     effect(() => {
+      const customers = this.customers();
+      const id = this.value();
+      if (id && customers.length) {
+        const found = customers.find((c) => c.id === id);
+        if (found) {
+          this._selectedCustomerSignal.set(found);
+        }
+      }
         const customer = this.customer();
         if (customer) {
             this._selectedCustomerSignal.set(customer);

@@ -50,7 +50,11 @@ import { BrnPopoverImports } from '@spartan-ng/brain/popover';
 
         <label class="grid gap-2 text-sm">
           <span>Customer</span>
-          <customer-combobox [customers]="customers()" (selectedCustomer)="selectCustomer($event)"/>
+          <customer-combobox
+            [customers]="customers()"
+            [value]="packageSignal()?.customerId"
+            (selectedCustomer)="selectCustomer($event)"
+          />
         </label>
 
         <label class="grid gap-2 text-sm">
