@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, output, signal } from "@angular/core";
+import { Component, effect, input, output, signal } from "@angular/core";
 import { HlmButtonImports } from '@libs/ui/button/src';
 import { HlmCommandImports } from '@libs/ui/command/src';
 import { HlmIconImports } from '@libs/ui/icon/src';
@@ -65,10 +65,24 @@ import { BrnPopoverImports } from '@spartan-ng/brain/popover';
 })
 export class CustomerComboboxComponent {
   public readonly customers = input<CustomerDTO[]>([]);
+  public readonly value = input<string | undefined>(undefined);
   public readonly selectedCustomer = output<CustomerDTO>();
 
   protected readonly _customerComboboxStateSignal = signal<'closed' | 'open'>('closed');
   protected readonly _selectedCustomerSignal = signal<CustomerDTO | undefined>(undefined);
+
+  constructor() {
+    effect(() => {
+      const customers = this.customers();
+      const id = this.value();
+      if (id && customers.length) {
+        const found = customers.find((c) => c.id === id);
+        if (found) {
+          this._selectedCustomerSignal.set(found);
+        }
+      }
+    }, { allowSignalWrites: true });
+  }
 
   protected _selectCustomer(customer: CustomerDTO) {
     this._selectedCustomerSignal.set(customer);
