@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, input, output } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, NonNullableFormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { HlmInput } from '@libs/ui/input/src';
 import { HlmDatePicker } from '@libs/ui/date-picker/src';
 import { CustomerDTO } from '@shared/dto/customer-dto.interface';
 import { UtilService } from '@/shared/services/util.service';
+import { calculateAge, MIN_AGE } from '@shared/helper';
 
 @Component({
   selector: 'customer-form',
@@ -36,6 +37,8 @@ import { UtilService } from '@/shared/services/util.service';
           formControlName="birthdate"
           class="w-full"
           [formatDate]="formatDate"
+          captionLayout="dropdown"
+          [max]="maxBirthdate"
         />
       </label>
 
@@ -60,12 +63,14 @@ export class CustomerFormComponent implements OnInit {
 
   private readonly _formBuilder = inject(NonNullableFormBuilder);
 
+  protected readonly maxBirthdate = ((today) => new Date(today.getFullYear() - MIN_AGE, today.getMonth(), today.getDate()))(new Date());
+
   protected readonly form = this._formBuilder.group({
     firstName: ['', [Validators.required, Validators.minLength(2)]],
     lastName: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
     phone: ['', [Validators.required]],
-    birthdate: [new Date(), [Validators.required]],
+    birthdate: [this.maxBirthdate, [Validators.required, minAgeValidator(MIN_AGE)]],
   });
 
   protected readonly formatDate = UtilService.formatLongDate;
@@ -108,4 +113,14 @@ export class CustomerFormComponent implements OnInit {
 
     this.save.emit({ id, customer: updatedCustomer });
   }
+}
+
+function minAgeValidator(minAge: number): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    if (!control.value) {
+      return null; // Let required validator handle empty values
+    }
+    const age = calculateAge(control.value);
+    return age >= minAge ? null : { minAge: { requiredAge: minAge, actualAge: age } };
+  };
 }

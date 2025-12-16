@@ -1,12 +1,13 @@
 import { CustomerDTO } from "@/shared/dto/customer-dto.interface";
 import { CustomerDetailsDTO } from "@/shared/dto/customer-details.dto";
 import { DeliveryStatus } from "@/shared/dto/delivery-dto.interface";
-import { WithoutId } from "@/shared/helper";
+import { WithoutId, calculateAge, MIN_AGE } from "@/shared/helper";
 import { PrismaClient } from "@prisma/client";
 import { ipcMain } from "electron";
 import { CustomerRepositoryImpl } from "../implementations/repositories/customer-repository-impl";
 import Registrable from "../interfaces/registrable.interface";
 import { CustomerRepository } from "../interfaces/repositories/customer-repository.interface";
+import { AppError } from "@/shared/errors";
 
 export default class CustomerIpc implements Registrable {
 
@@ -18,8 +19,15 @@ export default class CustomerIpc implements Registrable {
     this._customerRepositoryImpl = new CustomerRepositoryImpl(client);
   }
 
+  private _validateAge(birthdateInput: Date | string) {
+    if (calculateAge(birthdateInput) < MIN_AGE) {
+      throw new AppError('INVALID_ARGUMENT', `Customer must be at least ${MIN_AGE} years old.`);
+    }
+  }
+
   register() {
     ipcMain.handle('customer:insert', async (_event, customer: WithoutId<CustomerDTO>): Promise<string> => {
+      this._validateAge(customer.birthdate);
       return await this._customerRepositoryImpl.insert(customer);
     });
 
@@ -120,6 +128,7 @@ export default class CustomerIpc implements Registrable {
     });
 
     ipcMain.handle('customer:updateById', async (_event, id: string, customer: CustomerDTO): Promise<void> => {
+      this._validateAge(customer.birthdate);
       return await this._customerRepositoryImpl.updateById(id, customer);
     });
   }
