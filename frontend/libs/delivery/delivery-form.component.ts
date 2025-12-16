@@ -2,7 +2,7 @@ import { ContextService } from "@/shared/services/context";
 import { DataServiceImpl } from "@/shared/services/data";
 import { UtilService } from "@/shared/services/util.service";
 import { CommonModule } from '@angular/common';
-import { Component, inject, input, OnInit, output, signal } from "@angular/core";
+import { Component, effect, inject, input, output, signal } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { CustomerComboboxComponent } from '@libs/customer';
 import { HlmButtonImports } from '@libs/ui/button/src';
@@ -198,16 +198,17 @@ import { BrnSelectImports } from '@spartan-ng/brain/select';
     </form>
   `
 })
-export class DeliveryFormComponent implements OnInit {
+export class DeliveryFormComponent {
   private readonly _fb = inject(FormBuilder);
   private _contextService = inject(ContextService);
   private readonly _dataService = new DataServiceImpl(this._contextService.electronService);
 
-  public readonly delivery = input<DeliveryDTO>();
+  public readonly deliveryId = input<string>();
   public readonly customers = input<CustomerDTO[]>([]);
   public readonly save = output<{ id: string; delivery: DeliveryDTO }>();
 
   // State
+  protected readonly _delivery = signal<DeliveryDTO | undefined>(undefined);
   protected readonly _customerComboboxStateSignal = signal<'closed' | 'open'>('closed');
   protected readonly _selectedCustomerSignal = signal<CustomerDTO | undefined>(undefined);
   protected readonly _addressComboboxStateSignal = signal<'closed' | 'open'>('closed');
@@ -249,29 +250,50 @@ export class DeliveryFormComponent implements OnInit {
 
   protected readonly formatDate = UtilService.formatLongDate;
 
-  public ngOnInit() {
-    const delivery = this.delivery();
-    if (delivery) {
-      // Load existing delivery
-      this._form.patchValue({
-        customerId: delivery.customerId,
-        status: delivery.status,
-        addressId: delivery.addressId,
-        instruction: delivery.instruction,
-        scheduledAt: delivery.scheduledAt ? new Date(delivery.scheduledAt) : new Date()
-      });
-
-      this._selectedStatusSignal.set(delivery.status);
-
-      const customer = this.customers().find(c => c.id === delivery.customerId);
-      if (customer) {
-        this.selectCustomer(customer, delivery.addressId);
-        // Also need to select packages. DeliveryDTO has packageIds.
-        if (delivery.packageIds) {
-            delivery.packageIds.forEach(id => this._selectedPackageIds.add(id));
-        }
+  constructor() {
+    effect(() => {
+      const id = this.deliveryId();
+      if (id) {
+        this._dataService.deliveries.getDeliveryById(id).then(delivery => {
+            if (delivery) {
+                this._delivery.set(delivery);
+                // Load existing delivery
+                this._form.patchValue({
+                  customerId: delivery.customerId,
+                  status: delivery.status,
+                  addressId: delivery.addressId,
+                  instruction: delivery.instruction,
+                  scheduledAt: delivery.scheduledAt ? new Date(delivery.scheduledAt) : new Date()
+                });
+        
+                this._selectedStatusSignal.set(delivery.status);
+        
+                const customer = this.customers().find(c => c.id === delivery.customerId);
+                if (customer) {
+                  this.selectCustomer(customer, delivery.addressId);
+                  // Also need to select packages. DeliveryDTO has packageIds.
+                  this._selectedPackageIds.clear();
+                  if (delivery.packageIds) {
+                    delivery.packageIds.forEach(id => this._selectedPackageIds.add(id));
+                  }
+                }
+            }
+        });
+      } else {
+        // Reset or handle new delivery if ID is missing (though this component seems to be for editing mostly, or reused?)
+        // The add dialog might use it without an ID?
+        // If ID is undefined, it's a new delivery.
+        this._delivery.set(undefined);
+        this._form.reset({
+            status: 'scheduled',
+            scheduledAt: new Date()
+        });
+        this._selectedPackageIds.clear();
+        this._selectedStatusSignal.set(undefined);
+        this._selectedCustomerSignal.set(undefined);
+        this._selectedAddressSignal.set(undefined);
       }
-    }
+    }, { allowSignalWrites: true });
   }
 
   public async selectCustomer(customer: CustomerDTO, selectedAddressId?: string) {
@@ -314,7 +336,8 @@ export class DeliveryFormComponent implements OnInit {
       const checked = (event.target as HTMLInputElement).checked;
       if (checked) {
           this._selectedPackageIds.add(id);
-      } else {
+      }
+      else {
           this._selectedPackageIds.delete(id);
       }
   }
@@ -325,7 +348,7 @@ export class DeliveryFormComponent implements OnInit {
     }
 
     const formValue = this._form.value;
-    const delivery = this.delivery();
+    const delivery = this._delivery();
 
     const newDelivery: DeliveryDTO = {
       id: delivery?.id ?? crypto.randomUUID(),
