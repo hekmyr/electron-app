@@ -29,4 +29,8 @@ export class MockDeliveryService implements DeliveryService {
         this._deliveriesSignal.update(deliveries => deliveries.map(d => d.id === id ? delivery : d));
         return Promise.resolve();
     }
+    findById(id: string): Promise<DeliveryDTO | null> {
+        const delivery = this._deliveriesSignal().find(d => d.id === id) || null;
+        return Promise.resolve(delivery);
+    }
 }

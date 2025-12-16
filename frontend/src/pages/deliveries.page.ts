@@ -65,7 +65,7 @@ import { ColumnDef } from "@tanstack/angular-table";
           </hlm-alert-dialog-header>
           <delivery-form
             #editForm
-            [delivery]="selectedDelivery"
+            [deliveryId]="selectedDelivery?.id"
             [customers]="_customers()"
             (save)="handleEditSave($event, ctx)"
           />

@@ -6,4 +6,5 @@ export interface DeliveryService {
     updateById(id: string, delivery: DeliveryDTO): Promise<void>;
     insert(delivery: WithoutId<DeliveryDTO>): Promise<string>;
     deleteById(id: string): Promise<void>;
+    findById(id: string): Promise<DeliveryDTO | null>;
 }
