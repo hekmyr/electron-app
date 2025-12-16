@@ -22,14 +22,24 @@ export class MockReturnService implements ReturnService {
     }
 
     deleteById(id: string) {
+        this._returnsSignal.update(returns => returns.filter(r => r.id !== id));
         return Promise.resolve();
     }
 
     insert(returnData: WithoutId<ReturnDTO>) {
-        return Promise.resolve('mock-id');
+        const id = crypto.randomUUID();
+        const newReturn: ReturnDTO = {
+            id,
+            ...returnData,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+        this._returnsSignal.update(returns => [newReturn, ...returns]);
+        return Promise.resolve(id);
     }
 
     updateById(id: string, returnData: ReturnDTO) {
+        this._returnsSignal.update(returns => returns.map(r => r.id === id ? returnData : r));
         return Promise.resolve();
     }
 }
