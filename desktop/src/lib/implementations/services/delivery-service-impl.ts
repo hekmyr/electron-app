@@ -15,5 +15,8 @@ export const deliveryServiceImpl: DeliveryService = {
   },
   findbyPage: async (limit: number, page?: number) => {
     return await ipcRenderer.invoke('delivery:findbyPage', limit, page);
+  },
+  findById: async (id: string) => {
+    return await ipcRenderer.invoke('delivery:findById', id);
   }
 }

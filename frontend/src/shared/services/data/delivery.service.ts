@@ -6,6 +6,7 @@ export interface DeliveryService {
     updateDelivery(id: string, delivery: DeliveryDTO): Promise<void>;
     createDelivery(delivery: DeliveryDTO): Promise<void>;
     deleteDelivery(id: string): Promise<void>;
+    getDeliveryById(id: string): Promise<DeliveryDTO | null>;
 }
 
 export class DeliveryServiceImpl implements DeliveryService {
@@ -31,5 +32,9 @@ export class DeliveryServiceImpl implements DeliveryService {
 
     public async deleteDelivery(id: string): Promise<void> {
         await this._deliveryService.deleteById(id);
+    }
+
+    public async getDeliveryById(id: string): Promise<DeliveryDTO | null> {
+        return await this._deliveryService.findById(id);
     }
 }
