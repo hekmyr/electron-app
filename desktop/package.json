@@ -3,7 +3,9 @@
     "build": "npm run build:main && npm run build:preload",
     "build:main": "esbuild src/main.ts --bundle --platform=node --outfile=../dist/desktop/src/main.js --external:electron --external:@prisma/client --tsconfig=tsconfig.json",
     "build:preload": "esbuild src/preload.ts --bundle --platform=node --outfile=../dist/desktop/src/preload.js --external:electron --external:@prisma/client --tsconfig=tsconfig.json",
-    "start": "electron ../dist/desktop/src/main.js"
+    "start": "electron ../dist/desktop/src/main.js",
+    "db:pull": "prisma db pull",
+    "db:script": "prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script"
   },
   "prisma": {
     "schema": "prisma/schema.prisma"

@@ -52,6 +52,7 @@ CREATE TABLE `addresses` (
 CREATE TABLE `deliveries` (
     `id` CHAR(36) NOT NULL,
     `status` VARCHAR(191) NOT NULL,
+    `instruction` VARCHAR(191) NULL,
     `scheduledAt` DATETIME(3) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -90,4 +91,3 @@ ALTER TABLE `deliveries` ADD CONSTRAINT `deliveries_addressId_fkey` FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE `returns` ADD CONSTRAINT `returns_packageId_fkey` FOREIGN KEY (`packageId`) REFERENCES `packages`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
