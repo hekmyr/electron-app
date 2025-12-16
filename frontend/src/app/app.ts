@@ -29,12 +29,6 @@ export class App {
 
   protected readonly sidebar: SidebarGroup[] = [
     {
-      label: 'Main',
-      items: [
-        { label: 'Dashboard', url: '/' },
-      ]
-    },
-    {
       label: 'Management',
       items: [
         { label: 'Customers', url: '/customers' },
