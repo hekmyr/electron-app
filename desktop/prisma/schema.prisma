@@ -1,108 +1,74 @@
+
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model Customer {
-
-  id        String   @id @default(uuid()) @db.Char(36)
-  email     String   @unique
-  phone     String
+  id        String     @id @default(uuid())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   firstName String
   lastName  String
-  birthdate DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  billingAddressId  String? @db.Char(36)
-  deliveryAddressId String? @db.Char(36)
-
-  packages Package[]
-  addresses Address[]
+  email     String     @unique
+  phone     String
+  address   String
+  city      String
+  state     String
+  zip       String
+  packages  Package[]
   deliveries Delivery[]
-
-  @@map("customers")
 }
 
 model Package {
-
-  id               String    @id @default(uuid()) @db.Char(36)
-  name             String
-  description      String
-  status           String
-  receivedAt       DateTime?
-  deliveredAt      DateTime?
-  outForDeliveryAt DateTime?
-  Customer         Customer  @relation(fields: [customerId], references: [id])
-  customerId       String    @db.Char(36)
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-
-  Delivery   Delivery? @relation(fields: [deliveryId], references: [id])
-  deliveryId String?   @db.Char(36)
-
-  returns Return[]
-
-  @@map("packages")
-}
-
-model Address {
-  id          String   @id @default(uuid()) @db.Char(36)
-  street      String
-  houseNumber String
-  boxNumber   String?
-  postalCode  String
-  city        String
-  countryCode String
-  customerId  String   @db.Char(36)
-  Customer    Customer @relation(fields: [customerId], references: [id])
+  id          String   @id @default(uuid())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  Delivery Delivery[]
-
-  @@map("addresses")
+  weight      Float
+  length      Float
+  width       Float
+  height      Float
+  status      String
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+  deliveryId  String?
+  delivery    Delivery? @relation(fields: [deliveryId], references: [id])
 }
 
 model Delivery {
-  id          String   @id @default(uuid()) @db.Char(36)
-  status      String
-  instruction String?
-  scheduledAt DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  Customer   Customer @relation(fields: [customerId], references: [id])
-  customerId String   @db.Char(36)
-
-  Address   Address @relation(fields: [addressId], references: [id])
-  addressId String  @db.Char(36)
-
-  packages Package[]
-
-  @@map("deliveries")
+  id         String     @id @default(uuid())
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  status     String
+  driverId   String
+  driver     Driver     @relation(fields: [driverId], references: [id])
+  packages   Package[]
+  customerId String
+  customer   Customer   @relation(fields: [customerId], references: [id])
 }
 
-model Return {
-  id        String   @id @default(uuid()) @db.Char(36)
-  status    String
-  reason    String
+model Driver {
+  id         String     @id @default(uuid())
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  firstName  String
+  lastName   String
+  email      String     @unique
+  phone      String
+  deliveries Delivery[]
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  Package   Package @relation(fields: [packageId], references: [id])
-  packageId String  @db.Char(36)
-
-  @@map("returns")
+  content   String
+  role      String // "user" or "bot"
 }
-

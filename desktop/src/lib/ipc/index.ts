@@ -1,4 +1,7 @@
 import { PrismaClient } from "@prisma/client";
+import { registerChatIpcs } from "./chat-ipc";
+import { ChatServiceImpl } from "../implementations/chat-service-impl";
+import { ChatMessageRepositoryImpl } from "../implementations/chat-message-repository-impl";
 import AddressIpc from "./address-ipc";
 import CustomerIpc from "./customer-ipc";
 import DeliveryIpc from "./delivery-ipc";
@@ -17,4 +20,8 @@ export function registerIpcs(client: PrismaClient) {
   packageIpc.register();
   deliveryIpc.register();
   returnIpc.register();
+
+  const chatMessageRepository = new ChatMessageRepositoryImpl(client);
+  const chatService = new ChatServiceImpl(chatMessageRepository);
+  registerChatIpcs(chatService);
 }
